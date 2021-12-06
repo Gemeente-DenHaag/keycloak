@@ -12,7 +12,8 @@
                     <#list social.providers as p>
                         <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
                                 type="button" href="${p.loginUrl}">
-                            <#if p.guiOrder?has_content>
+                            <#--<#if p.guiOrder?has_content>-->
+                            <#if p.alias?starts_with("oidc")>
 								<i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}">
 									<span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">Inloggen met ${p.displayName!}</span>
 								</i>
