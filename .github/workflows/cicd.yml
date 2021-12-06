@@ -95,8 +95,7 @@ jobs:
         with:
           namespace: 'dhonline-staging'
           manifests: |
-            zgw-kubernetes/keycloak/test/configmap.yml
-            zgw-kubernetes/keycloak/test/ingress.yml
-            zgw-kubernetes/keycloak/service.yml
-            zgw-kubernetes/keycloak/deployment.yml
+            zgw-kubernetes/keycloak/test/configmap.yaml
+            zgw-kubernetes/keycloak/test/ingress.yaml
+            zgw-kubernetes/keycloak/keycloak.yaml
           images: '${{ steps.meta.outputs.tags }}'
