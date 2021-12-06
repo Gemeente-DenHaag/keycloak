@@ -3,13 +3,13 @@ name: Build and push image and deploy to aks
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 env:
-  PUSH_AND_DEPLOY: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+  PUSH_AND_DEPLOY: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
 
 jobs:
   build:
@@ -49,14 +49,14 @@ jobs:
       - name: 'Build and push image'
         uses: docker/build-push-action@v2
         with:
-          push: ${{ env.PUSH_AND_DEPLOY }}
+          push: true #${{ env.PUSH_AND_DEPLOY }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   deploy-to-test:
-    if: contains(github.ref, 'masterr')
+    if: contains(github.ref, 'mainn')
     runs-on: ubuntu-latest
     needs: build
     environment: test
