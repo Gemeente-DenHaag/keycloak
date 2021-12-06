@@ -481,6 +481,28 @@ ul#kc-totp-supported-apps {
 	display: none;
 }
 
+.fa-oidc-digid {
+    background: url(../img/digid.svg) top center no-repeat;
+    background-size: 109px 109px;
+    width: 100%;
+    padding-top: 140px;
+}
+
+.fa-oidc-digid:before {
+	display: none;
+}
+
+.fa-oidc-eherkenning {
+    background: url(../img/eherkenning.png) top center no-repeat;
+    background-size: 109px 109px;
+    width: 100%;
+    padding-top: 140px;
+}
+
+.fa-oidc-eherkenning:before {
+	display: none;
+}
+
 .kc-social-provider-name {
     /* position: relative; */
     top: 3px;

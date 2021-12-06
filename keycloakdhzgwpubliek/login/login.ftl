@@ -12,17 +12,11 @@
                     <#list social.providers as p>
                         <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
                                 type="button" href="${p.loginUrl}">
-                            <#if p.iconClasses?has_content>
-                                <#-- <i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}" aria-hidden="true"></i> -->
-                                <#-- <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">${p.displayName!}</span> -->
+                            <#if p.guiOrder?has_content>
 								<i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}">
 									<span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">Inloggen met ${p.displayName!}</span>
-								
 								</i>
 								<button class="kc-social-button">Inloggen</button>
-								
-								
-								
                             <#else>
                                 <span class="${properties.kcFormSocialAccountNameClass!}">${p.displayName!}</span>
                             </#if>
