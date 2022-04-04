@@ -13,8 +13,9 @@ COPY --from=builder /opt/keycloak/lib/quarkus/ /opt/keycloak/lib/quarkus/
 WORKDIR /opt/keycloak
 ENV KC_LOG_LEVEL=INFO
 ENV KC_PROXY=edge
-ENV KC_HTTP_ENABLED=true
+# ENV KC_HTTP_ENABLED=true
 ENV KC_HOSTNAME_STRICT=false
+ENV KC_HOSTNAME_STRICT_HTTPS=false
 
 COPY ./keycloakdhzgwpubliek/ /opt/keycloak/themes/keycloakdhzgwpubliek/
 COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak/providers/
