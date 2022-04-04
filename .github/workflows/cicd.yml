@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+      - develop
 
 env:
-  PUSH_AND_DEPLOY: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+  PUSH_AND_DEPLOY: ${{ github.event_name != 'pull_request'}) # && github.ref == 'refs/heads/main' }}
   CR_REPO: zgw/keycloak-with-theme
 
 jobs:
