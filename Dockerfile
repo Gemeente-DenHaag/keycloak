@@ -3,6 +3,9 @@ ENV KC_METRICS_ENABLED=true
 # ENV KC_FEATURES=authorization,account2,account-api,impersonation,token-exchange,client-policies
 ENV KC_FEATURES=token-exchange
 ENV KC_DB=postgres
+
+COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak/providers/
+
 RUN /opt/keycloak/bin/kc.sh build
 
 # COPY ./keycloakdhzgwpubliek/ /opt/keycloak/themes/keycloakdhzgwpubliek/
