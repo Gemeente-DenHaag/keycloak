@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:17.0.0 as builder
+FROM quay.io/keycloak/keycloak:17.0.1 as builder
 ENV KC_METRICS_ENABLED=true
 # ENV KC_FEATURES=authorization,account2,account-api,impersonation,token-exchange,client-policies
 ENV KC_FEATURES=token-exchange
@@ -17,7 +17,7 @@ RUN /opt/keycloak/bin/kc.sh build
 
 # RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:17.0.0
+FROM quay.io/keycloak/keycloak:17.0.1
 COPY --from=builder /opt/keycloak/lib/quarkus/ /opt/keycloak/lib/quarkus/
 COPY --from=builder /opt/keycloak/providers /opt/keycloak/providers
 WORKDIR /opt/keycloak
