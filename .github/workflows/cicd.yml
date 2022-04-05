@@ -53,8 +53,8 @@ jobs:
           push: ${{ env.PUSH_AND_DEPLOY }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
   deploy-to-test:
     if: contains(github.ref, 'main')
