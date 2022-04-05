@@ -4,7 +4,7 @@ ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange
 ENV KC_DB=postgres
 
-COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak/providers/
+# COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak/providers/
 
 RUN /opt/keycloak/bin/kc.sh build
 
@@ -12,7 +12,7 @@ RUN /opt/keycloak/bin/kc.sh build
 # COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak/standalone/deployments/
 
 FROM quay.io/keycloak/keycloak:17.0.1
-COPY --chown=1000:1000 --from=builder /opt/keycloak/lib/quarkus/ /opt/keycloak/lib/quarkus/
+COPY --from=builder /opt/keycloak/lib/quarkus/ /opt/keycloak/lib/quarkus/
 WORKDIR /opt/keycloak
 ENV KC_LOG_LEVEL=INFO
 ENV KC_PROXY=edge
