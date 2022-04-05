@@ -14,7 +14,7 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM quay.io/keycloak/keycloak:17.0.0
 COPY --from=builder /opt/keycloak/lib/quarkus/ /opt/keycloak/lib/quarkus/
 WORKDIR /opt/keycloak
-ENV KC_LOG_LEVEL=DEBUG
+ENV KC_LOG_LEVEL=INFO
 ENV KC_PROXY=edge
 # ENV KC_HTTP_ENABLED=true
 ENV KC_HOSTNAME_STRICT=false
