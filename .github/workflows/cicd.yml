@@ -22,10 +22,23 @@ jobs:
         uses: actions/checkout@main
 
       - name: 'Docker meta'
+        if: github.ref_name == 'main'
         id: meta
         uses: docker/metadata-action@v3
         with:
           images: ${{ secrets.ACR_LOGIN_SERVER }}/${{ env.CR_REPO }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=sha
+      
+      - name: 'Docker meta'
+        if: github.ref_name == 'develop'
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.ZGW_OTA_ACR_URL }}/${{ env.CR_REPO }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -39,11 +52,20 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: 'Login to acr'
+        if: github.ref_name == 'main'
         uses: docker/login-action@v1
         with:
           registry: ${{ secrets.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
+      
+      - name: 'Login to acr'
+        if: github.ref_name == 'develop'
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.ZGW_OTA_ACR_URL }}
+          username: ${{ secrets.ZGW_OTA_ACR_TOKEN_USERNAME }}
+          password: ${{ secrets.ZGW_OTA_ACR_TOKEN_PASSWORD }}
 
       - run: ls -al
 
@@ -57,7 +79,7 @@ jobs:
           # cache-to: type=gha,mode=max
 
   deploy-to-test:
-    if: contains(github.ref, 'main')
+    if: github.ref_name == 'main'
     runs-on: ubuntu-latest
     needs: build-and-push
     environment: test
