@@ -16,13 +16,16 @@
                             <#--<#if p.alias?starts_with("oidc")>-->
                             <#if p.guiOrder?has_content>
 								<i class="${properties.kcCommonLogoIdP!} ${p.iconClasses!}">
-									<span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">Inloggen met ${p.displayName!}</span>
+									
+                                    
 								</i>
+                                <span class="${properties.kcFormSocialAccountNameClass!} kc-social-icon-text">Inloggen met ${p.displayName!}</span>
 								<button class="kc-social-button">Inloggen</button>
                             <#else>
                                 <span class="${properties.kcFormSocialAccountNameClass!}">${p.displayName!}</span>
                             </#if>
                         </a>
+                        
                     </#list>
                 </ul>
             </div>

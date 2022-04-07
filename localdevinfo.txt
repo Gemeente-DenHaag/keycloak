@@ -1,0 +1,13 @@
+For developing this theme on a locale dev environment
+
+Build
+docker build -f Dockerfile-dev -t keycloak-theme:1.0 .
+
+Run container and develop at the sime time
+docker container run -d --name keycloak \
+  -p 8080:8080 \
+  --mount type=bind,source=/d/Projects/Github/keycloaktheme-zgwpubliek/keycloakdhzgwpubliek,target=/opt/jboss/keycloak/themes/keycloakdhzgwpubliek \
+  -e KEYCLOAK_USER=admin \
+  -e KEYCLOAK_PASSWORD=admin \
+  -e DB_VENDOR=h2 \
+  keycloak-theme:1.0
