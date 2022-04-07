@@ -10,7 +10,7 @@
 
                 <ul class="${properties.kcFormSocialAccountListClass!} <#if social.providers?size gt 1>${properties.kcFormSocialAccountListGridClass!}</#if>">
                     <#list social.providers as p>
-                        <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 3>${properties.kcFormSocialAccountGridItem!}</#if>"
+                        <a id="social-${p.alias}" class="${properties.kcFormSocialAccountListButtonClass!} <#if social.providers?size gt 6>${properties.kcFormSocialAccountGridItem!}</#if>"
                                 type="button" href="${p.loginUrl}">
                             <#--<#if p.guiOrder?has_content>-->
                             <#--<#if p.alias?starts_with("oidc")>-->
