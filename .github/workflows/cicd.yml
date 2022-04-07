@@ -67,8 +67,6 @@ jobs:
           username: ${{ secrets.ZGW_OTA_ACR_TOKEN_USERNAME }}
           password: ${{ secrets.ZGW_OTA_ACR_TOKEN_PASSWORD }}
 
-      - run: ls -al
-
       - name: 'Build and push image'
         if: github.ref_name == 'main'
         uses: docker/build-push-action@v2
