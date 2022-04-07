@@ -441,6 +441,7 @@ ul#kc-totp-supported-apps {
     font-size: 23px;
     width: 109px;
     height: 109px;
+    margin-bottom: 10px;
     /* float: left; */
 }
 
@@ -450,8 +451,8 @@ ul#kc-totp-supported-apps {
 }
 
 .kc-social-item {
-	padding-top: 40px;
-	margin-bottom: 100px;
+	padding-top: 20px;
+	/* margin-bottom: 100px; */
     /* margin-bottom: 0.5rem; /* default - IE compatibility */
     /* margin-bottom: var(--pf-global--spacer--sm); */
     font-size: 15px;
@@ -483,9 +484,11 @@ ul#kc-totp-supported-apps {
 
 .fa-oidc-digid {
     background: url(../img/digid.svg) top center no-repeat;
-    background-size: 109px 109px;
+    /* background-size: 109px; */
+    background-size: auto 109px;
     width: 100%;
-    padding-top: 140px;
+    /* height: 100%; */
+    /* padding-top: 140px; */
 }
 
 .fa-oidc-digid:before {
@@ -493,10 +496,10 @@ ul#kc-totp-supported-apps {
 }
 
 .fa-oidc-eherkenning {
-    background: url(../img/eherkenning.png) top center no-repeat;
-    background-size: 109px 109px;
+    background: url(../img/eherkenning3.png) top center no-repeat;
+    background-size: auto 109px;
     width: 100%;
-    padding-top: 140px;
+    /* padding-top: 140px; */
 }
 
 .fa-oidc-eherkenning:before {
@@ -505,7 +508,7 @@ ul#kc-totp-supported-apps {
 
 .kc-social-provider-name {
     /* position: relative; */
-    top: 3px;
+    /* top: 3px; */
 }
 
 .kc-social-icon-text {
@@ -513,12 +516,15 @@ ul#kc-totp-supported-apps {
 }
 
 .kc-social-button {
-    top: 60px;
-	position: relative;
-    /* display: inline-block; */
+    /* top: 60px; */
+	/* position: relative; */
+    display: flex;
 	background-color: #227b3c;
 	color: #fff;
 	border-color: transparent;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .kc-social-grid {
