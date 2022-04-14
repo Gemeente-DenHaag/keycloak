@@ -1,0 +1,108 @@
+## Configure the ingress resource that allows you to access the
+## app installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## When the ingress is enabled, a host pointing to this will be created
+  ##
+  # hostname: keycloak2-zgw.test.denhaag.nl
+  hostname: keycloak-zgw.test.denhaag.nl
+
+  ## Specify a tls secret which already exists. tls must be set to true
+  ##
+  existingTlsSecret: zgw-tls-secret
+
+##
+## Autoscaling configuration
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  # targetCPU: 50
+  # targetMemory: 50
+
+##
+## An array to add env vars
+##
+env:
+  # - name: KEYCLOAK_LOG_LEVEL
+  #   value: INFO
+  # - name: KEYCLOAK_ADMIN
+  #   value: zgwadmin
+  # - name: KC_PROXY
+  #   value: edge
+  # - name: KC_HTTP_PORT
+  #   value: "8080"
+  # - name: KC_HTTP_ENABLED
+  #   value: "true"
+  # - name: KC_HOSTNAME_STRICT
+  #   value: "false"
+  # - name: KC_HOSTNAME_STRICT_HTTPS
+  #   value: "false"
+  - name: KC_HOSTNAME
+    # value: keycloak2-zgw.test.denhaag.nl
+    value: keycloak-zgw.test.denhaag.nl
+  # - name: KC_HOSTNAME_PATH
+  #   value: /auth
+  # - name: KEYCLOAK_ADMIN_PASSWORD
+  #   value:
+  # - name: KC_DB_USERNAME
+  #   value: keycloak2-test
+  # - name: KC_DB_URL_DATABASE
+  #   value: 
+  # - name: KC_DB_URL_HOST
+  #   value: 
+  # - name: KC_DB_URL_PROPERTIES
+  #   value:
+  # - name: KC_DB_PASSWORD
+  #   value:
+  # - name: JAVA_OPTS_APPEND
+  #   value:
+  # - name: KC_DB
+  #   value: postgres
+
+##
+## Sync objects from Azure keyvault to kubernetes as secrets
+##
+syncAKV:
+  sync-1:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-test-keycloak-admin
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN
+  sync-2:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-test-keycloak-admin-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN_PASSWORD
+  sync-3:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-test-kc-db-url
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_URL
+  sync-4:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-test-kc-db-username
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_USERNAME
+  sync-5:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-test-kc-db-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_PASSWORD
