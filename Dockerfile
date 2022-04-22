@@ -1,6 +1,6 @@
 FROM quay.io/keycloak/keycloak:17.0.1 as builder
 ENV KC_METRICS_ENABLED=true
-ENV KC_FEATURES=token-exchange
+ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
 # need relative path for old test environment
 # ENV KC_HTTP_RELATIVE_PATH=/auth
