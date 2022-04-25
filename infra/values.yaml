@@ -1,7 +1,7 @@
 image:
   registry: ""
   repository: "zgw/keycloak-with-theme"
-  tag: main
+  tag: 
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -159,26 +159,25 @@ envFrom:
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes)
 ## Note: probes are disabled by default and have no checks defined
 ##
-# livenessProbe:
-#   enabled: true
-#   initialDelaySeconds: 30
-#   periodSeconds: 30
-#   timeoutSeconds: 5
-#   failureThreshold: 2
-#   successThreshold: 1
-# readinessProbe:
-#   enabled: false
-#   initialDelaySeconds: 60
-#   periodSeconds: 30
-#   timeoutSeconds: 5
-#   failureThreshold: 6
-#   successThreshold: 1
-# startupProbe:
-#   enabled: true
-#   tcpSocket:
-#     port: 8080
-#   initialDelaySeconds: 10
-#   periodSeconds: 20
-#   timeoutSeconds: 5
-#   failureThreshold: 15
-#   successThreshold: 1
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health/live
+    port: app
+    scheme: HTTP
+  initialDelaySeconds: 30
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /health/ready
+    port: app
+    scheme: HTTP
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
