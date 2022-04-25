@@ -163,7 +163,7 @@ livenessProbe:
   enabled: true
   httpGet:
     path: /health/live
-    port: app
+    port: 8080
     scheme: HTTP
   initialDelaySeconds: 30
   periodSeconds: 30
@@ -171,10 +171,10 @@ livenessProbe:
   failureThreshold: 3
   successThreshold: 1
 readinessProbe:
-  enabled: false
+  enabled: true
   httpGet:
     path: /health/ready
-    port: app
+    port: 8080
     scheme: HTTP
   initialDelaySeconds: 10
   periodSeconds: 30
