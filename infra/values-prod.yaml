@@ -5,7 +5,7 @@
 ingress:
   ## When the ingress is enabled, a host pointing to this will be created
   ##
-  hostname: keycloak-zgw.acc.denhaag.nl
+  hostname: keycloak-zgw.denhaag.nl
 
   ## Specify a tls secret which already exists. tls must be set to true
   ##
@@ -26,47 +26,47 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak-zgw.acc.denhaag.nl
+    value: keycloak-zgw.denhaag.nl
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
 ##
 syncAKV:
   sync-1:
-    vaultname: kv-zgw-ota-weu-01
-    objectname: keycloak-acc-keycloak-admin
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-keycloak-admin
     objecttype: secret
     output:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KEYCLOAK_ADMIN
   sync-2:
-    vaultname: kv-zgw-ota-weu-01
-    objectname: keycloak-acc-keycloak-admin-password
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-keycloak-admin-password
     objecttype: secret
     output:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KEYCLOAK_ADMIN_PASSWORD
   sync-3:
-    vaultname: kv-zgw-ota-weu-01
-    objectname: keycloak-acc-kc-db-url
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-url
     objecttype: secret
     output:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_URL
   sync-4:
-    vaultname: kv-zgw-ota-weu-01
-    objectname: keycloak-acc-kc-db-username
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-username
     objecttype: secret
     output:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_USERNAME
   sync-5:
-    vaultname: kv-zgw-ota-weu-01
-    objectname: keycloak-acc-kc-db-password
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-password
     objecttype: secret
     output:
       secret:
