@@ -1,3 +1,8 @@
+# ## Extra labels to add to Pod
+# ##
+podLabels:
+  public-access: allow
+
 ## Configure the ingress resource that allows you to access the
 ## app installation. Set up the URL
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -10,6 +15,12 @@ ingress:
   ## Specify a tls secret which already exists. tls must be set to true
   ##
   existingTlsSecret: zgw-tls-secret
+
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+    appgw.ingress.kubernetes.io/request-timeout: "30"
 
 ##
 ## Autoscaling configuration

@@ -1,32 +1,18 @@
 image:
   registry: ""
   repository: "zgw/keycloak-with-theme"
-  tag: 
+  tag: 17auth
+  #develop-new-ota-cl-8f1817ee-1650891849
+  #develop-new-ota-cl-e43ade12-1649969008
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
   ##
-  pullPolicy: IfNotPresent
-
-# sidecar:
-#   name: netshoot
-#   repository: nicolaka/netshoot
-#   tag: latest
-#   args:
-#   - sleep
-#   - '999'
-#   containerSecurityContext:
-#     enabled: false
-#     runAsNonRoot: false
-#     allowPrivilegeEscalation: true
-#     capabilities:
-#       add:
-#       - NET_ADMIN
-#       - NET_RAW
+  pullPolicy: Always
 
 ## Specifies the application name (required to be set)
 ##
-name: "keycloak"
+name: "keycloak2"
 
 ## Specifies the application resource kind
 ##
@@ -34,8 +20,8 @@ appKind: Deployment
 
 ## Extra labels to add to Pod
 ##
-# podLabels: 
-#   public-access: allow
+podLabels: 
+  public-access: allow
 
 ## Optionally, change this to ClusterFirstWithHostNet in case you have 'hostNetwork: true'.
 ## By default, while using host network, name resolution uses the host's DNS. If you wish nginx-controller
@@ -120,7 +106,7 @@ ingress:
   ## The Path to Nginx. You may need to set this to '/*' in order to use this
   ## with ALB ingress controllers.
   ##
-  path: /
+  path: /auth
 
   ## Ingress annotations done as key:value pairs
   ## For a full list of possible ingress annotations, please see
@@ -128,11 +114,12 @@ ingress:
   ##
   ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
   ##
-  # annotations:
-    # kubernetes.io/ingress.class: azure/application-gateway
-    # appgw.ingress.kubernetes.io/ssl-redirect: "true"
+  annotations: 
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/use-private-ip: "true"
     # appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-    # appgw.ingress.kubernetes.io/request-timeout: "30"
+    # appgw.ingress.kubernetes.io/request-timeout: "60"
 
   ## Enable TLS configuration for the hostname defined at ingress.hostname parameter
   ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
@@ -179,7 +166,7 @@ envFrom:
 livenessProbe:
   enabled: true
   httpGet:
-    path: /health/live
+    path: /auth/health/live
     port: 8080
     scheme: HTTP
   initialDelaySeconds: 30
@@ -190,7 +177,7 @@ livenessProbe:
 readinessProbe:
   enabled: true
   httpGet:
-    path: /health/ready
+    path: /auth/health/ready
     port: 8080
     scheme: HTTP
   initialDelaySeconds: 10

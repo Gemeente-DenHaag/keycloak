@@ -11,6 +11,17 @@ ingress:
   ##
   existingTlsSecret: zgw-tls-secret
 
+  ingressClassName: nginx
+  
+  ## Ingress annotations done as key:value pairs
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ##
+  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
+  ##
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
 ##
 ## Autoscaling configuration
 ##
@@ -27,6 +38,13 @@ autoscaling:
 env:
   - name: KC_HOSTNAME
     value: keycloak-zgw.acc.denhaag.nl
+  - name: KC_LOG_LEVEL
+    value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO
+  - name: KC_HTTPS_PROTOCOLS
+    value: TLSv1.3
+  # - name: PROXY_ADDRESS_FORWARDING
+  #   value: "true"
+    # INFO #DEBUG,org.hibernate:INFO
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
