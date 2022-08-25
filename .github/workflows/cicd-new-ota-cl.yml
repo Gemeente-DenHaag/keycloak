@@ -72,6 +72,9 @@ jobs:
     environment: test
 
     steps:
+      - name: 'Checkout repo'
+        uses: actions/checkout@main
+        
       - name: 'Deploy to AKS'
         uses: Gemeente-DenHaag/custom-actions/deploy-to-aks@main
         # uses: Gemeente-DenHaag/custom-actions/deploy-to-aks@v0.0.3-dta
