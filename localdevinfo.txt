@@ -17,6 +17,8 @@ docker container run -d --name keycloak \
 #####################################################
 Keycloak 17
 
+Change source path in below statement
+
 docker run --name keycloak_test -p 8080:8080 \
       --mount type=bind,source=/d/Projects/Github/keycloaktheme-zgwpubliek/keycloakdhzgwpubliek,target=/opt/keycloak/themes/keycloakdhzgwpubliek \
       -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=change_me \
