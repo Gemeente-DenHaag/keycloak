@@ -1,5 +1,7 @@
-For developing this theme on a locale dev environment
+For developing this theme on a local dev environment
 
+#####################################################
+Keycloak 13
 Build
 docker build -f Dockerfile-dev -t keycloak-theme:1.0 .
 
@@ -11,3 +13,12 @@ docker container run -d --name keycloak \
   -e KEYCLOAK_PASSWORD=admin \
   -e DB_VENDOR=h2 \
   keycloak-theme:1.0
+
+#####################################################
+Keycloak 17
+
+docker run --name keycloak_test -p 8080:8080 \
+      --mount type=bind,source=/d/Projects/Github/keycloaktheme-zgwpubliek/keycloakdhzgwpubliek,target=/opt/keycloak/themes/keycloakdhzgwpubliek \
+      -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=change_me \
+      quay.io/keycloak/keycloak:17.0.0 \
+      start-dev
