@@ -294,7 +294,8 @@ div.kc-logo-text span {
     overflow: visible;
     white-space: nowrap;
 	background: #edbf07;
-	height: 115px;
+	height: 95px;
+    margin-top: 20px;
 	/* background-image: url(../img/header.png); */
 }
 

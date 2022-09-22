@@ -1,0 +1,85 @@
+# ## Extra labels to add to Pod
+# ##
+podLabels:
+  public-access: allow
+
+## Configure the ingress resource that allows you to access the
+## app installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## When the ingress is enabled, a host pointing to this will be created
+  ##
+  hostname: keycloak-zgw.denhaag.nl
+
+  ## Specify a tls secret which already exists. tls must be set to true
+  ##
+  existingTlsSecret: zgw-tls-secret
+
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+    appgw.ingress.kubernetes.io/request-timeout: "30"
+
+##
+## Autoscaling configuration
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  # targetCPU: 50
+  # targetMemory: 50
+
+##
+## An array to add env vars
+##
+env:
+  - name: KC_HOSTNAME
+    value: keycloak-zgw.denhaag.nl
+
+##
+## Sync objects from Azure keyvault to kubernetes as secrets
+##
+syncAKV:
+  sync-1:
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-keycloak-admin
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN
+  sync-2:
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-keycloak-admin-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN_PASSWORD
+  sync-3:
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-url
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_URL
+  sync-4:
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-username
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_USERNAME
+  sync-5:
+    vaultname: kv-zgw-p-weu-01
+    objectname: keycloak-prod-kc-db-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_PASSWORD

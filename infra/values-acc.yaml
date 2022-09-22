@@ -1,0 +1,92 @@
+## Configure the ingress resource that allows you to access the
+## app installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## When the ingress is enabled, a host pointing to this will be created
+  ##
+  hostname: keycloak-zgw.acc.denhaag.nl
+
+  ## Specify a tls secret which already exists. tls must be set to true
+  ##
+  existingTlsSecret: zgw-tls-secret
+
+  ingressClassName: nginx
+  
+  ## Ingress annotations done as key:value pairs
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ##
+  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
+  ##
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+
+##
+## Autoscaling configuration
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  # targetCPU: 50
+  # targetMemory: 50
+
+##
+## An array to add env vars
+##
+env:
+  - name: KC_HOSTNAME
+    value: keycloak-zgw.acc.denhaag.nl
+  - name: KC_LOG_LEVEL
+    value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO
+  - name: KC_HTTPS_PROTOCOLS
+    value: TLSv1.3
+  # - name: PROXY_ADDRESS_FORWARDING
+  #   value: "true"
+    # INFO #DEBUG,org.hibernate:INFO
+
+##
+## Sync objects from Azure keyvault to kubernetes as secrets
+##
+syncAKV:
+  sync-1:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-acc-keycloak-admin
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN
+  sync-2:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-acc-keycloak-admin-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN_PASSWORD
+  sync-3:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-acc-kc-db-url
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_URL
+  sync-4:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-acc-kc-db-username
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_USERNAME
+  sync-5:
+    vaultname: kv-zgw-ota-weu-01
+    objectname: keycloak-acc-kc-db-password
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_PASSWORD
