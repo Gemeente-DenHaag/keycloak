@@ -13,7 +13,7 @@
 
             <@render.loginCard provider=p providerData=providersData />
 
-            <#if index != 0 && index % 3 == 2>
+            <#if index % 3 == 2>
                 </div>
                 <#assign closedGroup = true>
             </#if>

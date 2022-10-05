@@ -1,5 +1,6 @@
 <#import "template.ftl" as layout>
 <#import "card-group.ftl" as render>
+<#import "alert-message.ftl" as alertMessage>
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('username','password') displayInfo=realm.password && realm.registrationAllowed && !registrationDisabled??; section>
     <#if section = "header">
         ${msg("loginAccountTitle")}
@@ -35,6 +36,7 @@
             <#-- Render the authentication cards for the authorised providers  -->
             <#if authorisedProviders>
                 <h2 class="utrecht-heading-2">Inloggen als gemachtigde</h2>
+                <@alertMessage.info />
                 <@render.cardGroup providers=social.providers providersData=staticProviderData/>
             </#if>
         </#if>
