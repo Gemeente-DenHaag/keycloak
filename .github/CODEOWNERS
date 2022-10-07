@@ -1,9 +1,7 @@
-# This is a comment.
-# Each line is a file pattern followed by one or more owners.
+# Any change inside the `/.github/` directory
+# will require approval from @Test-Automation-Engineer.
+/.github/ @Test-Automation-Engineer
 
-# These owners will be the default owners for everything in
-# the repo. Unless a later match takes precedence,
-# @Test-Automation-Engineer will be requested for
-# review when someone opens a pull request.
-# disabled, not sure if needed
-*       @Test-Automation-Engineer
+# Any change inside the `/infra/` directory
+# will require approval from @Test-Automation-Engineer.
+/infra/ @Test-Automation-Engineer
