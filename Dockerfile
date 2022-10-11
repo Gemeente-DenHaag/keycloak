@@ -21,5 +21,6 @@ COPY --from=builder /opt/keycloak/lib/quarkus/ lib/quarkus/
 COPY --from=builder /opt/keycloak/providers/ providers/
 
 COPY ./keycloakdhzgwpubliek/ themes/keycloakdhzgwpubliek/
+COPY ./denhaagtheme/ themes/denhaagtheme/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start"]
