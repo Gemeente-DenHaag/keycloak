@@ -1,4 +1,8 @@
 @charset "UTF-8";
+body {
+  margin: 0;
+}
+
 @font-face {
   font-family: "TheMix";
   src: url("../fonts/TheMix_LP_700_.woff") format("woff");
@@ -129,7 +133,7 @@
 
 /**
  * Do not edit directly
- * Generated on Fri, 07 Oct 2022 14:01:27 GMT
+ * Generated on Fri, 21 Oct 2022 11:10:35 GMT
  */
 .denhaag-theme {
   --utrecht-space-column-5xl: 80px;
@@ -789,12 +793,12 @@
   --denhaag-card-group-s-gap: 16px;
   --denhaag-card-group-gap: 32px;
   --denhaag-card-authentication-logo-size: 56px;
-  --denhaag-card-authentication-header-margin-block-end: 16px;
-  --denhaag-card-authentication-footer-margin-block-start: 24px;
+  --denhaag-card-authentication-header-margin-block-end: 0px;
+  --denhaag-card-authentication-footer-margin-block-start: 8px;
   --denhaag-card-authentication-portrait-logo-margin-block-end: 24px;
   --denhaag-card-authentication-portrait-logo-size: 80px;
-  --denhaag-card-authentication-portrait-header-margin-block-end: 24px;
-  --denhaag-card-authentication-portrait-footer-margin-block-start: 32px;
+  --denhaag-card-authentication-portrait-header-margin-block-end: 8px;
+  --denhaag-card-authentication-portrait-footer-margin-block-start: 16px;
   --denhaag-card-authentication-portrait-min-inline-size: 283px;
   --denhaag-card-authentication-portrait-min-block-size: 415px;
   --denhaag-card-authentication-portrait-max-inline-size: 362px;
@@ -803,9 +807,12 @@
   --denhaag-button-large-size-padding-block: 0.40625rem;
   --denhaag-button-border-width: 1px;
   --denhaag-breadcrumb-list-max-width: 67.5rem;
+  --denhaag-breadcrumb-link-hover-text-decoration: underline;
+  --denhaag-breadcrumb-link-focus-text-decoration: underline;
   --denhaag-breadcrumb-link-icon-margin-inline: .75rem;
   --denhaag-breadcrumb-link-icon-width: .875rem;
   --denhaag-breadcrumb-link-icon-height: .875rem;
+  --denhaag-breadcrumb-link-text-decoration: none;
   --denhaag-breadcrumb-padding-inline: 0.75rem;
   --denhaag-breadcrumb-padding-block-md: 0.75rem;
   --denhaag-breadcrumb-padding-block: 1rem;
@@ -1037,7 +1044,7 @@
   --of-color-secondary: var(--denhaag-color-grey-2);
   --of-color-primary: var(--denhaag-color-green-3);
   --of-page-header-bg: var(--denhaag-color-white);
-  --of-link-color: var(--denhaag-color-green-3);
+  --of-page-footer-bg: var(--denhaag-color-grey-5);
   --of-layout-bg: var(--denhaag-color-white);
   --of-layout-background: var(--denhaag-color-white);
   --of-helptext-bg: var(--denhaag-color-blue-1);
@@ -1631,6 +1638,7 @@
   --utrecht-form-input-font-family: var(--utrecht-document-font-family);
   --utrecht-form-field-description-font-family: var(--utrecht-document-font-family);
   --utrecht-button-focus-border-color: var(--denhaag-focus-border-color);
+  --of-link-color: var(--denhaag-link-color);
   --denhaag-timeline-step-outline: var(--denhaag-focus-border);
   --denhaag-table-cell-outline-color: var(--denhaag-focus-border-color);
   --denhaag-radio-hover-invalid-border-color: var(--denhaag-checkbox-hover-invalid-border-color);
@@ -2567,21 +2575,23 @@ a.denhaag-button {
 }
 
 .denhaag-button-group {
+  display: flex;
+  flex-direction: var(--denhaag-button-group-flex-direction, column);
   gap: var(--denhaag-button-group-gap);
   padding-block-start: var(--denhaag-button-group-padding, var(--denhaag-button-group-gap));
   padding-block-end: var(--denhaag-button-group-padding, var(--denhaag-button-group-gap));
 }
 
+@media (max-width: 767px) {
+  .denhaag-button-group {
+    width: 100%;
+  }
+}
 @media (min-width: 768px) {
   .denhaag-button-group {
     --denhaag-button-group-flex-direction: row;
   }
 }
-.denhaag-button-group--multiple {
-  display: flex;
-  flex-direction: var(--denhaag-button-group-flex-direction, column);
-}
-
 .denhaag-card {
   width: var(--denhaag-card-width);
   border-radius: var(--denhaag-card-border-radius);
@@ -2842,6 +2852,12 @@ a.denhaag-button {
   box-sizing: border-box;
 }
 
+@media (min-width: 768px) {
+  .denhaag-card-authentication {
+    --denhaag-card-authentication-padding-block: 32px;
+    --denhaag-card-authentication-padding-inline: 32px;
+  }
+}
 .denhaag-card-authentication .denhaag-card-authentication__header {
   grid-template-areas: "card-heading card-logo";
   display: grid;
@@ -2874,6 +2890,8 @@ a.denhaag-button {
 }
 
 .denhaag-card-authentication--portrait {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
   min-block-size: var(--denhaag-card-authentication-portrait-min-block-size);
   text-align: center;
 }
@@ -2892,7 +2910,19 @@ a.denhaag-button {
   margin-block-end: var(--denhaag-card-authentication-portrait-logo-margin-block-end);
 }
 
+.denhaag-card-authentication--portrait .denhaag-card-authentication__title {
+  margin-block-end: 18px;
+}
+
+.denhaag-card-authentication--portrait .denhaag-card-authentication__cta {
+  display: flex;
+  justify-content: center;
+}
+
 .denhaag-card-authentication--portrait .denhaag-card-authentication__footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
   margin-block-start: var(--denhaag-card-authentication-portrait-footer-margin-block-start);
 }
 
@@ -2932,6 +2962,8 @@ a.denhaag-button {
   }
 }
 .denhaag-card-group--rows .denhaag-card-authentication {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
   min-block-size: var(--denhaag-card-authentication-portrait-min-block-size);
   text-align: center;
 }
@@ -2950,7 +2982,19 @@ a.denhaag-button {
   margin-block-end: var(--denhaag-card-authentication-portrait-logo-margin-block-end);
 }
 
+.denhaag-card-group--rows .denhaag-card-authentication .denhaag-card-authentication__title {
+  margin-block-end: 18px;
+}
+
+.denhaag-card-group--rows .denhaag-card-authentication .denhaag-card-authentication__cta {
+  display: flex;
+  justify-content: center;
+}
+
 .denhaag-card-group--rows .denhaag-card-authentication .denhaag-card-authentication__footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
   margin-block-start: var(--denhaag-card-authentication-portrait-footer-margin-block-start);
 }
 
@@ -2969,6 +3013,8 @@ a.denhaag-button {
   }
 
   .denhaag-card-group--responsive .denhaag-card-authentication {
+    display: grid;
+    grid-template-rows: auto auto 1fr;
     min-block-size: var(--denhaag-card-authentication-portrait-min-block-size);
     text-align: center;
   }
@@ -2987,7 +3033,19 @@ a.denhaag-button {
     margin-block-end: var(--denhaag-card-authentication-portrait-logo-margin-block-end);
   }
 
+  .denhaag-card-group--responsive .denhaag-card-authentication .denhaag-card-authentication__title {
+    margin-block-end: 18px;
+  }
+
+  .denhaag-card-group--responsive .denhaag-card-authentication .denhaag-card-authentication__cta {
+    display: flex;
+    justify-content: center;
+  }
+
   .denhaag-card-group--responsive .denhaag-card-authentication .denhaag-card-authentication__footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
     margin-block-start: var(--denhaag-card-authentication-portrait-footer-margin-block-start);
   }
 }
