@@ -14,8 +14,10 @@
             <#assign digid = "digid">
             <#assign eHerkenning = "eherkenning">
             <#assign eidas = "eidas">
-
-            <#assign staticProviderData = {digid: digidImg, eHerkenning: eHerkenningImg, eidas: eidasImg}>
+            <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://www.digid.nl/"}>
+            <#assign eHerkenningObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://eherkenning.nl/"}>
+            <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": ""}>
+            <#assign staticProviderData = {digid: digidObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
             <#assign authorisedInfoNotification = {"type": "info", "summary": msg("authorisedNotification")}>
 
             <#-- Based on the current situation, where normal providers have a 'oidc-' prefix -->
@@ -32,11 +34,12 @@
             <#-- First render the authentication cards for the normal providers  -->
             <#if normalProviders>
                 <h2 class="utrecht-heading-2">${msg("loginTitle")}</h2>
+                <p class="utrecht-paragraph">${msg("loginSubTitle")} <a href="#gemachtigde-heading" class="denhaag-link"><span class="denhaag-link__label">${msg("loginSubTitleLinkText")}</span></a>${msg("loginSubTitlePostLink")}</p>
                 <@render.cardGroup providers=social.providers providersData=staticProviderData/>
             </#if>
             <#-- Render the authentication cards for the authorised providers  -->
             <#if authorisedProviders>
-                <h2 class="utrecht-heading-2">${msg("authorisedLoginTitle")}</h2>
+                <h2 class="utrecht-heading-2" id="gemachtigde-heading">${msg("authorisedLoginTitle")}</h2>
                 <@alertMessage.showAlert message=authorisedInfoNotification />
                 <@render.cardGroup providers=social.providers providersData=staticProviderData/>
             </#if>
