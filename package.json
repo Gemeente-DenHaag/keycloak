@@ -7,7 +7,7 @@
     "copyfiles": "2.4.1"
   },
   "dependencies": {
-    "@gemeente-denhaag/keycloak": "0.1.1-alpha.235"
+    "@gemeente-denhaag/keycloak": "0.1.1-alpha.236"
   },
   "scripts": {
     "clean": "rimraf node_modules",
