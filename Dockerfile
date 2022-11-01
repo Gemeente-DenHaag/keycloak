@@ -21,13 +21,6 @@ COPY --from=builder /opt/keycloak/lib/quarkus/ lib/quarkus/
 COPY --from=builder /opt/keycloak/providers/ providers/
 
 COPY ./keycloakdhzgwpubliek/ themes/keycloakdhzgwpubliek/
-
-# Den Haag theme
-# Commands to retrieve CSS from @gemeente-denhaag/keycloak package, copy the CSS to the destination folder and cleanup.
-RUN npm ci
-RUN npm run copy
-RUN npm run clean
-
 COPY ./denhaagtheme/ themes/denhaagtheme/
 
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start"]
