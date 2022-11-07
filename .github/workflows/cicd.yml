@@ -28,6 +28,12 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@main
 
+      - name: 'Retrieve styling'
+        run : |
+            npm ci
+            npm run copy
+            npm run clean
+
       - name: 'Generate unique docker tag to deploy with Helm'
         id: prep
         run: |
