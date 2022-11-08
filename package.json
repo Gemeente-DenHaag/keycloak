@@ -12,6 +12,6 @@
   },
   "scripts": {
     "clean": "rimraf node_modules",
-    "copy": "copyfiles --flat ./node_modules/@gemeente-denhaag/keycloak/dist/index.css ./denhaagtheme/login/resources/css"
+    "copy": "copyfiles --flat --verbose ./node_modules/@gemeente-denhaag/keycloak/dist/index.css ./denhaagtheme/login/resources/css"
   }
 }

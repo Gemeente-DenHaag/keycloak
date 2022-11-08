@@ -30,7 +30,7 @@ jobs:
 
       - name: 'Retrieve styling'
         run : |
-            npm ci
+            npm ci --loglevel verbose
             npm run copy
             npm run clean
 
