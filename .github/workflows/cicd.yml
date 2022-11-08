@@ -32,8 +32,11 @@ jobs:
         run : |
             npm ci --loglevel verbose
             npm run copy
+            echo "ls ./node_modules/@gemeente-denhaag/"
             ls ./node_modules/@gemeente-denhaag/
+            echo "ls ./node_modules/@gemeente-denhaag/keycloak"
             ls ./node_modules/@gemeente-denhaag/keycloak
+            echo "ls ./node_modules/@gemeente-denhaag/keycloak/dist"
             ls ./node_modules/@gemeente-denhaag/keycloak/dist
             npm run clean
 
