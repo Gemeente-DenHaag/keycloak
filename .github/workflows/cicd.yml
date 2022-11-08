@@ -38,6 +38,10 @@ jobs:
             ls ./node_modules/@gemeente-denhaag/keycloak
             echo "ls ./node_modules/@gemeente-denhaag/keycloak/dist"
             ls ./node_modules/@gemeente-denhaag/keycloak/dist
+            echo "ls denhaagtheme/login/resources/css"
+            ls denhaagtheme/login/resources/css
+            echo "ls ./denhaagtheme/login/resources/css"
+            ls ./denhaagtheme/login/resources/css
             npm run clean
 
       - name: 'Generate unique docker tag to deploy with Helm'
