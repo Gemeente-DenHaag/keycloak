@@ -14,20 +14,21 @@
             <#assign digid = "digid">
             <#assign eHerkenning = "eherkenning">
             <#assign eidas = "eidas">
+            <#assign containsAuthorisedRegex = ".*(machtigen|bewindvoering).*">
             <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://www.digid.nl/digid-aanvragen-activeren/"}>
             <#assign eHerkenningObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://eherkenning.nl/nl/eherkenning-aanvragen"}>
             <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": ""}>
             <#assign staticProviderData = {digid: digidObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
             <#assign authorisedInfoNotification = {"type": "info", "summary": msg("authorisedNotification")}>
 
-            <#-- Based on the current situation, where normal providers have a 'oidc-' prefix -->
+            <#-- Based on the current situation, where authorised provider aliases contains 'machtigen' or 'bewindvoering' -->
             <#assign normalProviders = []>
             <#assign authorisedProviders = []>
             <#list social.providers as p>
-                <#if p.alias?starts_with("oidc-")>
-                    <#assign normalProviders = normalProviders + [p]>
-                <#else>
+                <#if p.alias?matches(containsAuthorisedRegex)>
                     <#assign authorisedProviders = authorisedProviders + [p]>
+                <#else>
+                    <#assign normalProviders = normalProviders + [p]>
                 </#if>
             </#list>
 
