@@ -90,3 +90,38 @@ syncAKV:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      appgw.ingress.kubernetes.io/request-timeout: "30"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      meta.helm.sh/release-name: keycloak
+      meta.helm.sh/release-namespace: zgw-acc
+    labels:
+      app.kubernetes.io/instance: keycloak
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: keycloak
+    name: keycloak-ag
+    namespace: zgw-acc
+  spec:
+    ingressClassName: azure-application-gateway
+    rules:
+    - host: keycloak-zgw.acc.denhaag.nl
+      http:
+        paths:
+        - backend:
+            service:
+              name: keycloak
+              port:
+                name: app
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - keycloak-zgw.acc.denhaag.nl
+      secretName: zgw-tls-secret
