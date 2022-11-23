@@ -10,18 +10,22 @@ podLabels:
 ingress:
   ## When the ingress is enabled, a host pointing to this will be created
   ##
-  # hostname: keycloak2-zgw.test.denhaag.nl
   hostname: keycloak-zgw.test.denhaag.nl
 
   ## Specify a tls secret which already exists. tls must be set to true
   ##
   existingTlsSecret: zgw-tls-secret
 
+  ingressClassName: nginx
+  
+  ## Ingress annotations done as key:value pairs
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ##
+  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
+  ##
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-    appgw.ingress.kubernetes.io/request-timeout: "30"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -119,3 +123,38 @@ syncAKV:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    annotations:
+      appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      appgw.ingress.kubernetes.io/request-timeout: "30"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      meta.helm.sh/release-name: keycloak
+      meta.helm.sh/release-namespace: zgw-test
+    labels:
+      app.kubernetes.io/instance: keycloak
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: keycloak
+    name: keycloak-ag
+    namespace: zgw-test
+  spec:
+    ingressClassName: azure-application-gateway
+    rules:
+    - host: keycloak-zgw.test.denhaag.nl
+      http:
+        paths:
+        - backend:
+            service:
+              name: keycloak
+              port:
+                name: app
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - keycloak-zgw.test.denhaag.nl
+      secretName: zgw-tls-secret

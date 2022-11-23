@@ -10,17 +10,22 @@ podLabels:
 ingress:
   ## When the ingress is enabled, a host pointing to this will be created
   ##
-  hostname: keycloak-zgw.denhaag.nl
+  hostname: keycloak.denhaag.nl
 
   ## Specify a tls secret which already exists. tls must be set to true
   ##
-  existingTlsSecret: zgw-tls-secret
+  existingTlsSecret: zgw4-tls-secret
 
+  ingressClassName: nginx
+  
+  ## Ingress annotations done as key:value pairs
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ##
+  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
+  ##
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-    appgw.ingress.kubernetes.io/request-timeout: "30"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -37,7 +42,7 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak-zgw.denhaag.nl
+    value: keycloak.denhaag.nl
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
@@ -83,3 +88,52 @@ syncAKV:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: keycloak-ag
+    annotations:
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      # appgw.ingress.kubernetes.io/health-probe-status-codes: "404"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+  spec:
+    ingressClassName: azure-application-gateway
+    tls:
+    - hosts:
+      - keycloak.denhaag.nl
+      secretName: zgw3-tls-secret
+    rules:
+    - host: keycloak.denhaag.nl
+      http:
+        paths:
+        - path: /js/
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak
+              port:
+                number: 8080
+        - path: /realms/
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak
+              port:
+                number: 8080
+        - path: /resources/
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak
+              port:
+                number: 8080
+        - path: /robots.txt
+          pathType: Prefix
+          backend:
+            service:
+              name: keycloak
+              port:
+                number: 8080
