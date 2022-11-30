@@ -1,8 +1,3 @@
-# ## Extra labels to add to Pod
-# ##
-podLabels:
-  public-access: allow
-
 ## Configure the ingress resource that allows you to access the
 ## app installation. Set up the URL
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
