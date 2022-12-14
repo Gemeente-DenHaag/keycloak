@@ -35,7 +35,9 @@
             <#-- First render the authentication cards for the normal providers  -->
             <#if normalProviders?size != 0>
                 <h2 class="utrecht-heading-2">${msg("loginTitle")}</h2>
-                <p class="utrecht-paragraph">${msg("loginSubTitle")} <a href="#gemachtigde-heading" class="denhaag-link"><span class="denhaag-link__label">${msg("loginSubTitleLinkText")}</span></a>${msg("loginSubTitlePostLink")}</p>
+                <#if authorisedProviders?size != 0>
+                    <p class="utrecht-paragraph">${msg("loginSubTitle")} <a href="#gemachtigde-heading" class="denhaag-link"><span class="denhaag-link__label">${msg("loginSubTitleLinkText")}</span></a>${msg("loginSubTitlePostLink")}</p>
+                </#if>
                 <@render.cardGroup providers=normalProviders providersData=staticProviderData />
             </#if>
             <#-- Render the authentication cards for the authorised providers  -->
