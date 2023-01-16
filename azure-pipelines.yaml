@@ -24,7 +24,7 @@ stages:
   displayName: Build image
   variables:
     containerRegistry: acr-crzgwpweu01
-    npmConfigCache: $(Pipeline.Workspace)/.npm
+    # npmConfigCache: $(Pipeline.Workspace)/.npm
     dockerConfigCache: $(Pipeline.Workspace)/docker
     buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
     branchname: ${SYSTEM_PULLREQUEST_SOURCEBRANCH-${BUILD_SOURCEBRANCH##refs/heads/}} # Get pullrequest branch, otherwise normal branch and strip refs/heads/
@@ -69,14 +69,15 @@ stages:
       name: Vars
       displayName: 'Vars'
 
-    - task: Cache@2
-      displayName: 'Configure npm cache'
-      inputs:
-        key: 'npm | "$(Agent.OS)" | package-lock.json'
-        restoreKeys: |
-          npm | "$(Agent.OS)"
-        path: $(npmConfigCache)
-        cacheHitVar: NPM_CACHE_RESTORED
+    # no cache needed
+    # - task: Cache@2
+    #   displayName: 'Configure npm cache'
+    #   inputs:
+    #     key: 'npm | "$(Agent.OS)" | package-lock.json'
+    #     restoreKeys: |
+    #       npm | "$(Agent.OS)"
+    #     path: $(npmConfigCache)
+    #     cacheHitVar: NPM_CACHE_RESTORED
 
     - task: NodeTool@0
       inputs:
@@ -85,7 +86,7 @@ stages:
       displayName: 'Install Node.js'
 
     - bash: |
-        npm ci --cache $(npmConfigCache)
+        npm ci
       displayName: 'Install dependencies'
       # condition: ne(variables.NPM_CACHE_RESTORED, 'true')
     
