@@ -27,7 +27,7 @@ stages:
     # npmConfigCache: $(Pipeline.Workspace)/.npm
     dockerConfigCache: $(Pipeline.Workspace)/docker
     buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
-    branchname: ${SYSTEM_PULLREQUEST_SOURCEBRANCH-${BUILD_SOURCEBRANCH##refs/heads/}} # Get pullrequest branch, otherwise normal branch and strip refs/heads/
+    branchname: ${SYSTEM_PULLREQUEST_TARGETBRANCH-${BUILD_SOURCEBRANCH##refs/heads/}} # Get pullrequest branch, otherwise normal branch and strip refs/heads/
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
   jobs:
@@ -42,9 +42,9 @@ stages:
         echo "buildtimestamp: $(buildTimeStamp)"
         echo "shortSha: $(shortSha)"
         echo "branchname: $(branchname)"
-        echo "pushDockerImage $(pushDockerImage)"
+        echo "pushDockerImage: $(pushDockerImage)"
         
-        echo 'Workspace $(Pipeline.Workspace)'
+        echo 'Workspace: $(Pipeline.Workspace)'
         echo 'Build.SourceBranch: $(Build.SourceBranch)'
         echo 'Build.SourceBranchName: $(Build.SourceBranchName)'
         echo 'Build.SourceVersion: $(Build.SourceVersion)'
