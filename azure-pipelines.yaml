@@ -27,9 +27,10 @@ stages:
     # npmConfigCache: $(Pipeline.Workspace)/.npm
     dockerConfigCache: $(Pipeline.Workspace)/docker
     buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
-    branchname: ${SYSTEM_PULLREQUEST_TARGETBRANCH-${BUILD_SOURCEBRANCH##refs/heads/}} # Get pullrequest branch, otherwise normal branch and strip refs/heads/
-    shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
+    branchname: $[coalesce(variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))] # Get pullrequest branch, otherwise normal branch and strip refs/heads/
+    isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
+    shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
   jobs:
   - job: Build
     displayName: Build
@@ -40,9 +41,10 @@ stages:
         # set date to get correct system datetime
         sudo timedatectl set-timezone 'Europe/Amsterdam'
         echo "buildtimestamp: $(buildTimeStamp)"
-        echo "shortSha: $(shortSha)"
         echo "branchname: $(branchname)"
+        echo "isRelease: $(isRelease)"
         echo "pushDockerImage: $(pushDockerImage)"
+        echo "shortSha: $(shortSha)"
         
         echo 'Workspace: $(Pipeline.Workspace)'
         echo 'Build.SourceBranch: $(Build.SourceBranch)'
@@ -56,10 +58,10 @@ stages:
         branchname=$(branchname)
         # ${branchname//\//-} will replace / in branch with -, ie feature/test -> feature-test
         tag=${branchname//\//-}-$(shortSha)-$(buildTimeStamp)
-        if [[ $(branchname) == 'main' || $(branchname) =~ "release/v" || $(branchname) =~ "hotfix/v" ]]; then
-            tags=$tag,acc-latest,latest
+        if [[ $(isRelease) == 'True' ]]; then
+          tags=$tag,acc-latest,latest
         else
-            tags=$tag,test-latest
+          tags=$tag,test-latest
         fi
         echo "Tags: $tags"
 
