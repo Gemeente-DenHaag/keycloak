@@ -20,7 +20,7 @@ ingress:
   ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
   ##
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -37,11 +37,12 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak-zgw.acc.denhaag.nl
+    value: '{{ .Values.ingress.hostname }}'
   - name: KC_LOG_LEVEL
-    value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO
-  - name: KC_HTTPS_PROTOCOLS
-    value: TLSv1.3
+    value: INFO,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+    # value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO,io.quarkus.vertx.http:INFO,org.postgresql.jdbc:INFO
+  # - name: KC_HTTPS_PROTOCOLS
+  #   value: TLSv1.3
   # - name: PROXY_ADDRESS_FORWARDING
   #   value: "true"
     # INFO #DEBUG,org.hibernate:INFO
@@ -96,32 +97,33 @@ extraObjects:
   kind: Ingress
   metadata:
     annotations:
-      appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-      appgw.ingress.kubernetes.io/request-timeout: "30"
+      # appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      # appgw.ingress.kubernetes.io/request-timeout: "30"
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
       appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
-      meta.helm.sh/release-name: keycloak
-      meta.helm.sh/release-namespace: zgw-acc
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
     labels:
-      app.kubernetes.io/instance: keycloak
-      app.kubernetes.io/managed-by: Helm
-      app.kubernetes.io/name: keycloak
-    name: keycloak-ag
-    namespace: zgw-acc
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ .Release.Namespace }}'
   spec:
     ingressClassName: azure-application-gateway
     rules:
-    - host: keycloak-zgw.acc.denhaag.nl
+    - host: '{{ .Values.ingress.hostname }}'
       http:
         paths:
         - backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 name: app
           path: /
           pathType: Prefix
     tls:
     - hosts:
-      - keycloak-zgw.acc.denhaag.nl
-      secretName: zgw-tls-secret
+      - '{{ .Values.ingress.hostname }}'
+      secretName: '{{ .Values.ingress.existingTlsSecret }}'

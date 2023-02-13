@@ -20,7 +20,7 @@ ingress:
   ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
   ##
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -38,6 +38,9 @@ autoscaling:
 env:
   - name: KC_HOSTNAME
     value: keycloak.denhaag.nl
+  - name: KC_LOG_LEVEL
+    value: INFO
+    #,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
@@ -88,7 +91,7 @@ extraObjects:
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
-    name: keycloak-ag
+    name: '{{ include "common.names.fullname" . }}-ag'
     annotations:
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
       # appgw.ingress.kubernetes.io/health-probe-status-codes: "404"
@@ -98,37 +101,37 @@ extraObjects:
     ingressClassName: azure-application-gateway
     tls:
     - hosts:
-      - keycloak.denhaag.nl
+      - '{{ .Values.ingress.hostname }}'
       secretName: zgw3-tls-secret
     rules:
-    - host: keycloak.denhaag.nl
+    - host: '{{ .Values.ingress.hostname }}'
       http:
         paths:
         - path: /js/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /realms/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /resources/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /robots.txt
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
