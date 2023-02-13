@@ -20,7 +20,7 @@ ingress:
   ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
   ##
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -37,7 +37,10 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak.denhaag.nl
+    value: '{{ .Values.ingress.hostname }}'
+  - name: KC_LOG_LEVEL
+    value: INFO
+    #,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
@@ -88,47 +91,54 @@ extraObjects:
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
-    name: keycloak-ag
     annotations:
-      appgw.ingress.kubernetes.io/ssl-redirect: "true"
       # appgw.ingress.kubernetes.io/health-probe-status-codes: "404"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
       appgw.ingress.kubernetes.io/health-probe-path: "/health"
       appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
+    labels:
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ .Release.Namespace }}'
   spec:
     ingressClassName: azure-application-gateway
-    tls:
-    - hosts:
-      - keycloak.denhaag.nl
-      secretName: zgw3-tls-secret
     rules:
-    - host: keycloak.denhaag.nl
+    - host: '{{ .Values.ingress.hostname }}'
       http:
         paths:
         - path: /js/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /realms/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /resources/
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
         - path: /robots.txt
           pathType: Prefix
           backend:
             service:
-              name: keycloak
+              name: '{{ include "common.names.fullname" . }}'
               port:
                 number: 8080
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: zgw3-tls-secret
