@@ -17,7 +17,7 @@
             <#assign containsAuthorisedRegex = ".*(machtigen|bewindvoering).*">
             <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://www.digid.nl/digid-aanvragen-activeren/"}>
             <#assign eHerkenningObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://eherkenning.nl/nl/eherkenning-aanvragen"}>
-            <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": ""}>
+            <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": "https://www.government.nl/topics/online-access-to-public-services-european-economic-area-eidas/everything-you-need-to-know-about-eidas"}>
             <#assign staticProviderData = {digid: digidObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
             <#assign authorisedInfoNotification = {"type": "info", "summary": msg("authorisedNotification")}>
 
