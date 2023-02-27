@@ -15,10 +15,12 @@
             <#assign eHerkenning = "eherkenning">
             <#assign eidas = "eidas">
             <#assign containsAuthorisedRegex = ".*(machtigen|bewindvoering).*">
-            <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://www.digid.nl/digid-aanvragen-activeren/"}>
+            <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://digid.nl "}>
+            <#assign digidGemachtigdeObj = {"imageUrl": digidImg, "footerUrl": "https://machtigen.digid.nl "}>
             <#assign eHerkenningObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://eherkenning.nl/nl/eherkenning-aanvragen"}>
             <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": "https://www.government.nl/topics/online-access-to-public-services-european-economic-area-eidas/everything-you-need-to-know-about-eidas"}>
             <#assign staticProviderData = {digid: digidObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
+            <#assign staticAuthorisedProviderData = {digid: digidGemachtigdeObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
             <#assign authorisedInfoNotification = {"type": "info", "summary": msg("authorisedNotification")}>
 
             <#-- Based on the current situation, where authorised provider aliases contains 'machtigen' or 'bewindvoering' -->
@@ -44,7 +46,7 @@
             <#if authorisedProviders?size != 0>
                 <h2 class="utrecht-heading-2" id="gemachtigde-heading">${msg("authorisedLoginTitle")}</h2>
                 <@alertMessage.showAlert message=authorisedInfoNotification />
-                <@render.cardGroup providers=authorisedProviders providersData=staticProviderData/>
+                <@render.cardGroup providers=authorisedProviders providersData=staticAuthorisedProviderData/>
             </#if>
         </#if>
     </#if>
