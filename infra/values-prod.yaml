@@ -1,3 +1,8 @@
+## Extra labels to add to Pod
+##
+podLabels:
+  public-access: allow
+
 ## Configure the ingress resource that allows you to access the
 ## app installation. Set up the URL
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -10,17 +15,6 @@ ingress:
   ## Specify a tls secret which already exists. tls must be set to true
   ##
   existingTlsSecret: zgw4-tls-secret
-
-  ingressClassName: nginx
-  
-  ## Ingress annotations done as key:value pairs
-  ## For a full list of possible ingress annotations, please see
-  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
-  ##
-  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
-  ##
-  annotations:
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
 ##
 ## Autoscaling configuration
@@ -91,6 +85,8 @@ extraObjects:
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ .Release.Namespace }}'
     annotations:
       # appgw.ingress.kubernetes.io/health-probe-status-codes: "404"
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
@@ -102,8 +98,6 @@ extraObjects:
       app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
       app.kubernetes.io/managed-by: '{{ .Release.Service }}'
       app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
-    name: '{{ include "common.names.fullname" . }}-ag'
-    namespace: '{{ .Release.Namespace }}'
   spec:
     ingressClassName: azure-application-gateway
     rules:
