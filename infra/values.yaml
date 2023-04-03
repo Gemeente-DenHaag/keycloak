@@ -1,5 +1,5 @@
 image:
-  registry: ""
+  registry: "crzgwpweu01.azurecr.io"
   repository: "zgw/keycloak-with-theme"
   tag: 
   ## Specify a imagePullPolicy
@@ -32,10 +32,9 @@ name: "keycloak"
 ##
 appKind: Deployment
 
-## Extra labels to add to Pod
-##
-podLabels: 
-  public-access: allow
+## Controls whether the container automatically mounts the ServiceAccount's API credentials
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#opt-out-of-api-credential-automounting
+automountServiceAccountToken: false
 
 ## Optionally, change this to ClusterFirstWithHostNet in case you have 'hostNetwork: true'.
 ## By default, while using host network, name resolution uses the host's DNS. If you wish nginx-controller
@@ -51,6 +50,7 @@ podSecurityContext:
   fsGroup: 1000
   runAsUser: 1000
   runAsGroup: 1000
+  runAsNonRoot: true
 
 ## Container security context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
@@ -66,9 +66,7 @@ podSecurityContext:
 ##
 containerSecurityContext:
   enabled: true
-  # readOnlyRootFilesystem: true
-  runAsUser: 1000
-  runAsNonRoot: true
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
 
 ## Application service parameters
@@ -113,6 +111,8 @@ ingress:
   ##
   pathType: Prefix
 
+  ingressClassName: nginx
+
   ## Override API Version (automatically detected if not set)
   ##
   apiVersion:
@@ -128,11 +128,8 @@ ingress:
   ##
   ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
   ##
-  # annotations:
-    # kubernetes.io/ingress.class: azure/application-gateway
-    # appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    # appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-    # appgw.ingress.kubernetes.io/request-timeout: "30"
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
   ## Enable TLS configuration for the hostname defined at ingress.hostname parameter
   ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
@@ -145,13 +142,13 @@ ingress:
 ##  resources, such as Minikube. If you do want to specify resources, uncomment the following
 ##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
 ##
-resources:
-  limits:
-    cpu: 2000m
-    memory: 1Gi
-  requests:
-    cpu: 500m
-    memory: 500Mi
+# resources:
+#   limits:
+#     cpu: 2000m
+#     memory: 2Gi
+#   requests:
+#     cpu: 500m
+#     memory: 1Gi
 
 ## Pod anti-affinity preset
 ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -198,3 +195,16 @@ readinessProbe:
   timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
+
+# fix for readOnlyRootFilesystem
+volumes:
+- name: tmpfs-1
+  emptyDir: {}
+# - name: tmpfs-2
+#   emptyDir: {}
+
+volumeMounts:
+  - mountPath: /tmp
+    name: tmpfs-1
+  - mountPath: /opt/keycloak/data/tmp
+    name: tmpfs-1
