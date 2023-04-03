@@ -142,13 +142,13 @@ ingress:
 ##  resources, such as Minikube. If you do want to specify resources, uncomment the following
 ##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
 ##
-resources:
-  limits:
-    cpu: 2000m
-    memory: 1Gi
-  requests:
-    cpu: 500m
-    memory: 500Mi
+# resources:
+#   limits:
+#     cpu: 2000m
+#     memory: 2Gi
+#   requests:
+#     cpu: 500m
+#     memory: 1Gi
 
 ## Pod anti-affinity preset
 ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
@@ -200,11 +200,11 @@ readinessProbe:
 volumes:
 - name: tmpfs-1
   emptyDir: {}
-- name: tmpfs-2
-  emptyDir: {}
+# - name: tmpfs-2
+#   emptyDir: {}
 
 volumeMounts:
   - mountPath: /tmp
     name: tmpfs-1
   - mountPath: /opt/keycloak/data/tmp
-    name: tmpfs-2
+    name: tmpfs-1
