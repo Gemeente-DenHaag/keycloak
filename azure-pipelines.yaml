@@ -1,0 +1,268 @@
+trigger:
+ branches:
+  include:
+    - main
+    - release/v*
+    - hotfix/v*
+    - develop
+    - feature/*
+pr:
+  branches:
+   include:
+    - '*'
+
+variables:
+  vmImage: ubuntu-latest
+  containerRegistryUrl: crzgwpweu01.azurecr.io
+  containerRepository: zgw/keycloak-with-theme
+  releaseName: keycloak
+  tags: # will be set by script
+  tag: # will be set by script
+
+stages:
+- stage: Build
+  displayName: Build image
+  variables:
+    containerRegistry: acr-crzgwpweu01
+    # npmConfigCache: $(Pipeline.Workspace)/.npm
+    dockerConfigCache: $(Pipeline.Workspace)/docker
+    buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
+    branchname: $[coalesce(variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))] # Get pullrequest branch, otherwise normal branch and strip refs/heads/
+    isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
+    pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
+    shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImage)
+    steps:
+    - bash: |
+        # set date to get correct system datetime
+        sudo timedatectl set-timezone 'Europe/Amsterdam'
+        echo "buildtimestamp: $(buildTimeStamp)"
+        echo "branchname: $(branchname)"
+        echo "isRelease: $(isRelease)"
+        echo "pushDockerImage: $(pushDockerImage)"
+        echo "shortSha: $(shortSha)"
+        
+        echo 'Workspace: $(Pipeline.Workspace)'
+        echo 'Build.SourceBranch: $(Build.SourceBranch)'
+        echo 'Build.SourceBranchName: $(Build.SourceBranchName)'
+        echo 'Build.SourceVersion: $(Build.SourceVersion)'
+        echo 'Build.SourcesDirectory: $(Build.SourcesDirectory)'
+        echo 'Build.ArtifactStagingDirectory: $(build.artifactstagingdirectory)'
+        echo 'System.PullRequest.SourceBranch: $(System.PullRequest.SourceBranch)'
+        echo 'System.PullRequest.TargetBranch: $(System.PullRequest.TargetBranch)'
+
+        branchname=$(branchname)
+        # ${branchname//\//-} will replace / in branch with -, ie feature/test -> feature-test
+        tag=${branchname//\//-}-$(shortSha)-$(buildTimeStamp)
+        if [[ $(isRelease) == 'True' ]]; then
+          tags=$tag,acc-latest,latest
+        else
+          tags=$tag,test-latest
+        fi
+        echo "Tags: $tags"
+
+        # set variables
+        echo "##vso[task.setvariable variable=tags;isOutput=true]$tags"
+        echo "##vso[task.setvariable variable=tag;isOutput=true]$tag"
+      name: Vars
+      displayName: 'Vars'
+
+    # no cache needed
+    # - task: Cache@2
+    #   displayName: 'Configure npm cache'
+    #   inputs:
+    #     key: 'npm | "$(Agent.OS)" | package-lock.json'
+    #     restoreKeys: |
+    #       npm | "$(Agent.OS)"
+    #     path: $(npmConfigCache)
+    #     cacheHitVar: NPM_CACHE_RESTORED
+
+    - task: NodeTool@0
+      inputs:
+        versionSource: 'spec'
+        versionSpec: '14.x'
+      displayName: 'Install Node.js'
+
+    - bash: |
+        npm ci
+      displayName: 'Install dependencies'
+      # condition: ne(variables.NPM_CACHE_RESTORED, 'true')
+    
+    - bash: |
+        npm run copy
+        npm run clean
+      displayName: 'Build app'
+
+    - task: Cache@2
+      displayName: 'Configure docker cache'
+      inputs:
+        key: 'docker | "$(Agent.OS)" | cache'
+        path: $(dockerConfigCache)
+        cacheHitVar: DOCKER_CACHE_RESTORED #Variable to set to 'true' when the cache is restored
+    
+    - bash: |
+        docker load -i $(dockerConfigCache)/cache.tar
+      displayName: 'Restore docker image'
+      condition: and(not(canceled()), eq(variables.DOCKER_CACHE_RESTORED, 'true'))
+
+    - task: Docker@2
+      displayName: 'Build docker image'
+      inputs:
+        containerRegistry: '${{ variables.containerRegistry }}'
+        repository: '$(containerRepository)'
+        command: 'build'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(Vars.tags)'
+    
+    - task: Docker@2
+      condition: eq(variables.pushDockerImage, 'true')
+      displayName: 'Push docker image'
+      inputs:
+        containerRegistry: '${{ variables.containerRegistry }}'
+        repository: '$(containerRepository)'
+        command: 'push'
+        tags: '$(Vars.tags)'
+    
+    - bash: |
+        mkdir -p $(dockerConfigCache)
+        docker save -o $(dockerConfigCache)/cache.tar $(containerRegistryUrl)/$(containerRepository):$(Vars.tag)
+      displayName: 'Save docker image'
+      condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_RESTORED, 'true')))
+
+- stage: DeployToTest
+  dependsOn: Build
+  displayName: Deploy image to Test
+  condition: and(succeeded(), eq(variables['build.sourceBranchName'], 'develop'))
+  variables:
+    kubernetesServiceConnection: aks-zgw-ota-weu-01-zgw-test
+    namespace: zgw-test
+    tags: $[ stageDependencies.Build.Build.outputs['Vars.tags'] ]
+    tag: $[ stageDependencies.Build.Build.outputs['Vars.tag'] ]
+  jobs:
+  - deployment: Deploy_to_Test
+    pool:
+      vmImage: $(vmImage)
+    environment: $(releaseName)-Test
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'denhaag/generic'
+              releaseName: '$(releaseName)'
+              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra/values.yaml -f infra/values-test.yaml --atomic'
+
+- stage: DeployToAcc
+  dependsOn: Build
+  displayName: Deploy image to Acc
+  condition: and(succeeded(), or(contains(variables['build.sourceBranch'], '/release/v'), contains(variables['build.sourceBranch'], '/hotfix/v')))
+  variables:
+    kubernetesServiceConnection: aks-zgw-ota-weu-01-zgw-acc
+    namespace: zgw-acc
+    tags: $[ stageDependencies.Build.Build.outputs['Vars.tags'] ]
+    tag: $[ stageDependencies.Build.Build.outputs['Vars.tag'] ]
+  jobs:
+  - deployment: Deploy_to_Acc
+    pool:
+      vmImage: $(vmImage)
+    environment: $(releaseName)-Acc
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'denhaag/generic'
+              releaseName: '$(releaseName)'
+              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra/values.yaml -f infra/values-acc.yaml --atomic'
+
+- stage: DeployToProd
+  dependsOn:
+    - Build
+    - DeployToAcc
+  displayName: Deploy image to Prod
+  condition: and(succeeded(), or(contains(variables['build.sourceBranch'], '/release/v'), contains(variables['build.sourceBranch'], '/hotfix/v')))
+  variables:
+    kubernetesServiceConnection: aks-zgw-p-weu-01-zgw-prod
+    namespace: zgw-prod
+    tags: $[ stageDependencies.Build.Build.outputs['Vars.tags'] ]
+    tag: $[ stageDependencies.Build.Build.outputs['Vars.tag'] ]
+  jobs:
+  - deployment: Deploy_to_Prod
+    pool:
+      vmImage: $(vmImage)
+    environment: $(releaseName)-Prod
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'denhaag/generic'
+              releaseName: '$(releaseName)'
+              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra/values.yaml -f infra/values-prod.yaml --atomic'

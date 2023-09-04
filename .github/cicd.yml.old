@@ -3,6 +3,7 @@ name: Build and push image and deploy to k8s
 on:
   push:
     branches:
+      - '!feature/**'
       - develop
       - 'release/v**'
       - main
@@ -12,7 +13,8 @@ on:
       - main
 
 env:
-  PUSH_AND_DEPLOY: ${{ github.event_name != 'pull_request' }} # && github.ref == 'refs/heads/main' }}
+  CACHE_DOCKER_IMAGE: ${{ github.event_name != 'pull_request' && github.ref_name == 'main' }}
+  PUSH_DOCKER_IMAGE: ${{ github.event_name != 'pull_request' && !contains(github.ref,'feature/') }}
   CR_REPO: zgw/keycloak-with-theme
 
 jobs:
@@ -26,6 +28,12 @@ jobs:
       - name: 'Checkout repo'
         uses: actions/checkout@main
 
+      - name: 'Retrieve styling'
+        run : |
+            npm ci
+            npm run copy
+            npm run clean
+
       - name: 'Generate unique docker tag to deploy with Helm'
         id: prep
         run: |
@@ -38,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ secrets.ZGW_OTA_ACR_URL }}/${{ env.CR_REPO }}
+          images: ${{ secrets.ZGW_PROD_ACR_URL }}/${{ env.CR_REPO }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -57,18 +65,23 @@ jobs:
       - name: 'Login to acr'
         uses: docker/login-action@v1
         with:
-          registry: ${{ secrets.ZGW_OTA_ACR_URL }}
-          username: ${{ secrets.ZGW_OTA_ACR_TOKEN_USERNAME }}
-          password: ${{ secrets.ZGW_OTA_ACR_TOKEN_PASSWORD }}
+          registry: ${{ secrets.ZGW_PROD_ACR_URL }}
+          username: ${{ secrets.ZGW_PROD_ACR_TOKEN_USERNAME }}
+          password: ${{ secrets.ZGW_PROD_ACR_TOKEN_PASSWORD }}
+
+      - name: 'Set cache_to env'
+        if: env.CACHE_DOCKER_IMAGE == 'true'
+        run: echo "cache_to=type=gha,mode=max" >> $GITHUB_ENV
 
       - name: 'Build and push image'
         uses: docker/build-push-action@v2
         with:
-          push: ${{ env.PUSH_AND_DEPLOY }}
+          context: .
+          push: ${{ env.PUSH_DOCKER_IMAGE }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: ${{ env.cache_to }}
 
   deploy-to-test:
     if: github.ref_name == 'develop'
@@ -89,7 +102,7 @@ jobs:
           release-name: keycloak
           values-files: infra/values.yaml,infra/values-test.yaml
           namespace: zgw-test
-          full-image-url: ${{ secrets.ZGW_OTA_ACR_URL }}/${{ env.CR_REPO }}:${{ needs.build.outputs.tagToDeploy }}
+          full-image-url: ${{ secrets.ZGW_PROD_ACR_URL }}/${{ env.CR_REPO }}:${{ needs.build.outputs.tagToDeploy }}
 
   deploy-to-acc:
     if: contains(github.ref, 'release/v')
@@ -110,4 +123,4 @@ jobs:
           release-name: keycloak
           values-files: infra/values.yaml,infra/values-acc.yaml
           namespace: zgw-acc
-          full-image-url: ${{ secrets.ZGW_OTA_ACR_URL }}/${{ env.CR_REPO }}:${{ needs.build.outputs.tagToDeploy }}
+          full-image-url: ${{ secrets.ZGW_PROD_ACR_URL }}/${{ env.CR_REPO }}:${{ needs.build.outputs.tagToDeploy }}

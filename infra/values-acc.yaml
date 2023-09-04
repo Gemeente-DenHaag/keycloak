@@ -1,3 +1,8 @@
+## Extra labels to add to Pod
+##
+podLabels:
+  public-access: allow
+
 ## Configure the ingress resource that allows you to access the
 ## app installation. Set up the URL
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -11,16 +16,18 @@ ingress:
   ##
   existingTlsSecret: zgw-tls-secret
 
-  ingressClassName: nginx
-  
-  ## Ingress annotations done as key:value pairs
-  ## For a full list of possible ingress annotations, please see
-  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
-  ##
-  ## If certManager is set to true, annotation kubernetes.io/tls-acme: "true" will automatically be set
-  ##
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+##  We usually recommend not to specify default resources and to leave this as a conscious
+##  choice for the user. This also increases chances charts run on environments with little
+##  resources, such as Minikube. If you do want to specify resources, uncomment the following
+##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+##
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
 
 ##
 ## Autoscaling configuration
@@ -37,11 +44,12 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak-zgw.acc.denhaag.nl
+    value: '{{ .Values.ingress.hostname }}'
   - name: KC_LOG_LEVEL
-    value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO
-  - name: KC_HTTPS_PROTOCOLS
-    value: TLSv1.3
+    value: INFO,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+    # value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO,io.quarkus.vertx.http:INFO,org.postgresql.jdbc:INFO
+  # - name: KC_HTTPS_PROTOCOLS
+  #   value: TLSv1.3
   # - name: PROXY_ADDRESS_FORWARDING
   #   value: "true"
     # INFO #DEBUG,org.hibernate:INFO
@@ -90,3 +98,39 @@ syncAKV:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      # appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+      # appgw.ingress.kubernetes.io/request-timeout: "30"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
+    labels:
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+  spec:
+    ingressClassName: azure-application-gateway
+    rules:
+    - host: '{{ .Values.ingress.hostname }}'
+      http:
+        paths:
+        - backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                name: app
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: '{{ .Values.ingress.existingTlsSecret }}'

@@ -1,5 +1,5 @@
-# ## Extra labels to add to Pod
-# ##
+## Extra labels to add to Pod
+##
 podLabels:
   public-access: allow
 
@@ -10,17 +10,24 @@ podLabels:
 ingress:
   ## When the ingress is enabled, a host pointing to this will be created
   ##
-  hostname: keycloak-zgw.denhaag.nl
+  hostname: keycloak.denhaag.nl
 
   ## Specify a tls secret which already exists. tls must be set to true
   ##
-  existingTlsSecret: zgw-tls-secret
+  existingTlsSecret: zgw4-tls-secret
 
-  annotations:
-    kubernetes.io/ingress.class: azure/application-gateway
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-    appgw.ingress.kubernetes.io/request-timeout: "30"
+##  We usually recommend not to specify default resources and to leave this as a conscious
+##  choice for the user. This also increases chances charts run on environments with little
+##  resources, such as Minikube. If you do want to specify resources, uncomment the following
+##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+##
+resources:
+  limits:
+    cpu: 2
+    memory: 2Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
 
 ##
 ## Autoscaling configuration
@@ -37,7 +44,10 @@ autoscaling:
 ##
 env:
   - name: KC_HOSTNAME
-    value: keycloak-zgw.denhaag.nl
+    value: '{{ .Values.ingress.hostname }}'
+  - name: KC_LOG_LEVEL
+    value: INFO
+    #,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
 
 ##
 ## Sync objects from Azure keyvault to kubernetes as secrets
@@ -83,3 +93,59 @@ syncAKV:
       secret:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      # appgw.ingress.kubernetes.io/health-probe-status-codes: "404"
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
+    labels:
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+  spec:
+    ingressClassName: azure-application-gateway
+    rules:
+    - host: '{{ .Values.ingress.hostname }}'
+      http:
+        paths:
+        - path: /js/
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+        - path: /realms/
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+        - path: /resources/
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+        - path: /robots.txt
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: zgw3-tls-secret
