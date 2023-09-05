@@ -123,13 +123,34 @@ extraObjects:
     - host: '{{ .Values.ingress.hostname }}'
       http:
         paths:
-        - backend:
+        - path: /js/
+          pathType: Prefix
+          backend:
             service:
               name: '{{ include "common.names.fullname" . }}'
               port:
-                name: app
-          path: /
+                number: 8080
+        - path: /realms/
           pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+        - path: /resources/
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
+        - path: /robots.txt
+          pathType: Prefix
+          backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                number: 8080
     tls:
     - hosts:
       - '{{ .Values.ingress.hostname }}'
