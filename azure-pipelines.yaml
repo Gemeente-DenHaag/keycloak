@@ -29,7 +29,8 @@ stages:
     buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
     branchname: $[coalesce(variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))] # Get pullrequest branch, otherwise normal branch and strip refs/heads/
     isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
-    pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
+    # pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
+    pushDockerImage: true
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
   jobs:
   - job: Build

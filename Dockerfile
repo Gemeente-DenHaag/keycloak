@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:17.0.1 as builder
+FROM quay.io/keycloak/keycloak:22.0 as builder
 ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
@@ -9,7 +9,7 @@ COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar /opt/keycloak
 
 RUN /opt/keycloak/bin/kc.sh build
 
-FROM quay.io/keycloak/keycloak:17.0.1
+FROM quay.io/keycloak/keycloak:22.0
 WORKDIR /opt/keycloak
 ENV KC_LOG_LEVEL=INFO
 ENV KC_PROXY=edge
