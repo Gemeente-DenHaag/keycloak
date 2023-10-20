@@ -23,4 +23,7 @@ COPY --from=builder /opt/keycloak/providers/ providers/
 # COPY ./keycloakdhzgwpubliek/ themes/keycloakdhzgwpubliek/
 COPY ./denhaagtheme/ themes/denhaagtheme/
 
+RUN cat /etc/crypto-policies/back-ends/java.config
+
+
 ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start","--optimized"]
