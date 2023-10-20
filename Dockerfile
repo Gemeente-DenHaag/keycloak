@@ -23,4 +23,4 @@ COPY --from=builder /opt/keycloak/providers/ providers/
 # COPY ./keycloakdhzgwpubliek/ themes/keycloakdhzgwpubliek/
 COPY ./denhaagtheme/ themes/denhaagtheme/
 
-ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start"]
+ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start","--optimized"]
