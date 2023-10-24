@@ -5,7 +5,7 @@
     <#if provider.displayName??>
         <#list providerData?keys as key>
             <#if provider.displayName?lower_case?contains(key)>
-                <#assign providerType = key>
+                <#assign providerType = key?replace(" ", "")>
                 <#assign providerDataObj = providerData[key]>
                 <#assign imageSrc = providerDataObj.imageUrl>
                 <#assign footerSrc = providerDataObj.footerUrl>
