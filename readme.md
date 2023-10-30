@@ -15,7 +15,7 @@ docker run --name keycloak_test -p 8080:8080 \ --mount type=bind,source=/**sourc
 
 3. Go to localhost:8080
 4. Go to Administration Console
-5. In the top left corner > add realm > import realm > select file: /realm-export.json
+5. In the top left corner > add realm > import realm > select file: realm-export.json, that you need to receive from the team
 6. Go to Realm Settings > Themes > select denhaagtheme
 
 After this, you can check/test the updated styling in your local development environment.
