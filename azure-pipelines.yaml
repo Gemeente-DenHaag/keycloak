@@ -29,8 +29,7 @@ stages:
     buildTimeStamp: $(date +%Y%m%d%H%M%S) # Get datetimestamp
     branchname: $[coalesce(variables['System.PullRequest.TargetBranch'], replace(variables['Build.SourceBranch'], 'refs/heads/', ''))] # Get pullrequest branch, otherwise normal branch and strip refs/heads/
     isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
-    # pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), not(contains(variables['build.sourceBranch'], '/feature/')), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, feature or main
-    pushDockerImage: true
+    pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
   jobs:
   - job: Build
@@ -61,8 +60,12 @@ stages:
         tag=${branchname//\//-}-$(shortSha)-$(buildTimeStamp)
         if [[ $(isRelease) == 'True' ]]; then
           tags=$tag,acc-latest,latest
-        else
+        elif [[ "$branchname" == "develop" ]]; then
           tags=$tag,test-latest
+        elif [[ $branchname =~ feature.* ]]; then
+          tags=$tag,dev-latest
+        else
+          tags=$tag
         fi
         echo "Tags: $tags"
 
@@ -133,6 +136,50 @@ stages:
         docker save -o $(dockerConfigCache)/cache.tar $(containerRegistryUrl)/$(containerRepository):$(Vars.tag)
       displayName: 'Save docker image'
       condition: and(not(canceled()), or(failed(), ne(variables.DOCKER_CACHE_RESTORED, 'true')))
+
+- stage: DeployToDev
+  dependsOn: Build
+  displayName: Deploy image to Dev
+  condition: and(succeeded(), contains(variables['build.sourceBranch'], '/feature/'))
+  variables:
+    kubernetesServiceConnection: aks-saks-o-weu-01-zgw-o
+    namespace: zgw-o
+    tags: $[ stageDependencies.Build.Build.outputs['Vars.tags'] ]
+    tag: $[ stageDependencies.Build.Build.outputs['Vars.tag'] ]
+  jobs:
+  - deployment: Deploy_to_Dev
+    pool:
+      vmImage: $(vmImage)
+    environment: $(releaseName)-Dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'denhaag/generic'
+              releaseName: '$(releaseName)'
+              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra/values.yaml -f infra/values-dev.yaml --atomic'
 
 - stage: DeployToTest
   dependsOn: Build

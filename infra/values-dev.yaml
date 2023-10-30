@@ -3,6 +3,12 @@
 podLabels:
   public-access: allow
 
+tolerations:
+- key: "zgwo01"
+  operator: "Equal"
+  value: "true"
+  effect: "NoSchedule"
+
 ## Configure the ingress resource that allows you to access the
 ## app installation. Set up the URL
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -16,12 +22,13 @@ ingress:
   ##
   existingTlsSecret: sterdevdenhaagnl-tls
 
-  ingressClassName: azure-application-gateway
-  
+  ingressClassName:
+
   annotations:
+    kubernetes.io/ingress.class: azure/application-gateway-ext
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/health-probe-path: "/health"
-    appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+    # appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
 
 ##  We usually recommend not to specify default resources and to leave this as a conscious
 ##  choice for the user. This also increases chances charts run on environments with little
@@ -135,38 +142,36 @@ syncAKV:
         name: '{{ include "app.fullname" . }}'
         dataKey: KC_DB_PASSWORD
 
-# extraObjects:
-# - apiVersion: networking.k8s.io/v1
-#   kind: Ingress
-#   metadata:
-#     name: '{{ include "common.names.fullname" . }}-ag'
-#     namespace: '{{ .Release.Namespace }}'
-#     annotations:
-#       # appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
-#       # appgw.ingress.kubernetes.io/request-timeout: "30"
-#       appgw.ingress.kubernetes.io/ssl-redirect: "true"
-#       appgw.ingress.kubernetes.io/health-probe-path: "/health"
-#       appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
-#       meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
-#       meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
-#     labels:
-#       app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
-#       app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-#       app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
-#   spec:
-#     ingressClassName: azure-application-gateway
-#     rules:
-#     - host: '{{ .Values.ingress.hostname }}'
-#       http:
-#         paths:
-#         - backend:
-#             service:
-#               name: '{{ include "common.names.fullname" . }}'
-#               port:
-#                 name: app
-#           path: /
-#           pathType: Prefix
-#     tls:
-#     - hosts:
-#       - '{{ .Values.ingress.hostname }}'
-#       secretName: '{{ .Values.ingress.existingTlsSecret }}'
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-int'
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway-int
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      # appgw.ingress.kubernetes.io/use-private-ip: "true" not needed
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
+    labels:
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+  spec:
+    rules:
+    - host: '{{ .Values.ingress.hostname }}'
+      http:
+        paths:
+        - backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                name: app
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: '{{ .Values.ingress.existingTlsSecret }}'
