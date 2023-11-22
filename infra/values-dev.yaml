@@ -25,7 +25,7 @@ ingress:
   ingressClassName:
 
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway-ext
+    kubernetes.io/ingress.class: azure/application-gateway-int
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/health-probe-path: "/health"
     # appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
@@ -146,10 +146,10 @@ extraObjects:
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
-    name: '{{ include "common.names.fullname" . }}-int'
+    name: '{{ include "common.names.fullname" . }}-ext'
     namespace: '{{ .Release.Namespace }}'
     annotations:
-      kubernetes.io/ingress.class: azure/application-gateway-int
+      kubernetes.io/ingress.class: azure/application-gateway-ext
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
       appgw.ingress.kubernetes.io/health-probe-path: "/health"
       # appgw.ingress.kubernetes.io/use-private-ip: "true" not needed
