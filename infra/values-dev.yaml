@@ -28,6 +28,7 @@ ingress:
     kubernetes.io/ingress.class: azure/application-gateway-int
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
     appgw.ingress.kubernetes.io/health-probe-path: "/health"
+    appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
     # appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
 
 ##  We usually recommend not to specify default resources and to leave this as a conscious
@@ -152,6 +153,7 @@ extraObjects:
       kubernetes.io/ingress.class: azure/application-gateway-ext
       appgw.ingress.kubernetes.io/ssl-redirect: "true"
       appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
       # appgw.ingress.kubernetes.io/use-private-ip: "true" not needed
       meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
       meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
