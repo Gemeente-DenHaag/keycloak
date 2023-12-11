@@ -16,6 +16,38 @@ extraDeploy:
     output:
       secret:
         name: keycloak2
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ext'
+    namespace: '{{ include "common.names.namespace" . }}'
+    # labels:
+    #   app.kubernetes.io/component: keycloak
+    #   app.kubernetes.io/instance: keycloak2
+    #   app.kubernetes.io/managed-by: Helm
+    #   app.kubernetes.io/name: keycloak
+    #   helm.sh/chart: keycloak-17.3.6
+    annotations:
+      appgw.ingress.kubernetes.io/ssl-redirect: 'true'
+      kubernetes.io/ingress.class: azure/application-gateway-ext
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
+  spec:
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: sterdevdenhaagnl-tls
+    rules:
+      - host: '{{ .Values.ingress.hostname }}'
+        http:
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: '{{ include "common.names.fullname" . }}'
+                  port:
+                    name: http
 
 ## @section Keycloak parameters
 
@@ -55,7 +87,7 @@ ingress:
   ##
   # annotations: {}
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway-ext
+    kubernetes.io/ingress.class: azure/application-gateway-int
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
   ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
   ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
@@ -67,7 +99,7 @@ ingress:
   # extraTls: []
   extraTls:
   - hosts:
-      - keycloak2-zgw.dev.denhaag.nl
+    - keycloak2-zgw.dev.denhaag.nl
     secretName: sterdevdenhaagnl-tls
 
 ## @section Other parameters
