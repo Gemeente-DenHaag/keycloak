@@ -5,17 +5,17 @@ extraDeploy:
 - apiVersion: spv.no/v2beta1
   kind: AzureKeyVaultSecret
   metadata:
-    name: keycloak2-akv2k8s
+    name: keycloak-akv2k8s
   spec:
     vault:
       name: kv-zgw-ota-weu-01
       object:
         contentType: 'application/x-yaml'
-        name: keycloak2-dev
+        name: keycloak-dev
         type: multi-key-value-secret
     output:
       secret:
-        name: keycloak2
+        name: keycloak
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
@@ -23,7 +23,7 @@ extraDeploy:
     namespace: '{{ include "common.names.namespace" . }}'
     # labels:
     #   app.kubernetes.io/component: keycloak
-    #   app.kubernetes.io/instance: keycloak2
+    #   app.kubernetes.io/instance: keycloak
     #   app.kubernetes.io/managed-by: Helm
     #   app.kubernetes.io/name: keycloak
     #   helm.sh/chart: keycloak-17.3.6
@@ -76,7 +76,7 @@ replicaCount: 1
 ingress:
   ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
-  hostname: keycloak2-zgw.dev.denhaag.nl
+  hostname: keycloak-zgw.dev.denhaag.nl
   ## @param ingress.annotations [object] Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
   ## Use this parameter to set the required annotations for cert-manager, see
   ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
@@ -99,7 +99,7 @@ ingress:
   # extraTls: []
   extraTls:
   - hosts:
-    - keycloak2-zgw.dev.denhaag.nl
+    - keycloak-zgw.dev.denhaag.nl
     secretName: sterdevdenhaagnl-tls
 
 ## @section Other parameters
@@ -155,7 +155,7 @@ externalDatabase:
   user: 
   database: 
   password: ""
-  existingSecret: "keycloak2"
+  existingSecret: "keycloak"
   existingSecretHostKey: "KEYCLOAK_DATABASE_HOST"
   existingSecretPortKey: "KEYCLOAK_DATABASE_PORT"
   existingSecretUserKey: "KEYCLOAK_DATABASE_USER"
