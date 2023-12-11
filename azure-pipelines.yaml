@@ -31,6 +31,11 @@ stages:
     isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
+    isFeature: $[contains(variables['branchname'], 'feature/')]
+    ${{ if variables.isFeature }}:
+      dockerfile: 'Dockerfile-22'
+    ${{ else }}:
+      dockerfile: 'Dockerfile'
   jobs:
   - job: Build
     displayName: Build
@@ -43,6 +48,8 @@ stages:
         echo "buildtimestamp: $(buildTimeStamp)"
         echo "branchname: $(branchname)"
         echo "isRelease: $(isRelease)"
+        echo "isFeature: $(isFeature)"
+        echo "dockerfile: $(dockerfile)"
         echo "pushDockerImage: $(pushDockerImage)"
         echo "shortSha: $(shortSha)"
         
@@ -119,7 +126,7 @@ stages:
         containerRegistry: '${{ variables.containerRegistry }}'
         repository: '$(containerRepository)'
         command: 'build'
-        Dockerfile: '**/Dockerfile'
+        Dockerfile: '**/$(dockerfile)'
         tags: '$(Vars.tags)'
     
     - task: Docker@2
