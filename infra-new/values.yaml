@@ -1117,11 +1117,11 @@ externalDatabase:
   database: 
   password: ""
   existingSecret: "keycloak2"
-  existingSecretHostKey: "KEYCLOAK_DATABASE_HOST"
-  existingSecretPortKey: "KEYCLOAK_DATABASE_PORT"
-  existingSecretUserKey: "KEYCLOAK_DATABASE_USER"
-  existingSecretDatabaseKey: "KEYCLOAK_DATABASE_NAME"
-  existingSecretPasswordKey: "KEYCLOAK_DATABASE_PASSWORD"
+  existingSecretHostKey: "KEYCLOAKDATABASEHOST"
+  existingSecretPortKey: "KEYCLOAKDATABASEPORT"
+  existingSecretUserKey: "KEYCLOAKDATABASEUSER"
+  existingSecretDatabaseKey: "KEYCLOAKDATABASENAME"
+  existingSecretPasswordKey: "KEYCLOAKDATABASEPASSWORD"
   annotations: {}
 
 ## @section Keycloak Cache parameters
