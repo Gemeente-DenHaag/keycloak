@@ -31,8 +31,8 @@ stages:
     isRelease: $[or(contains(variables['branchname'], '/release/v'), contains(variables['branchname'], '/hotfix/v'), eq(variables['branchname'], 'main'))]
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
-    isFeature: $[contains(variables['branchname'], 'feature/')]
-    ${{ if variables.isFeature }}:
+    isFeature: $[contains(variables['branchname'], '/feature/')]
+    ${{ if eq(variables.isFeature, 'true') }}:
       dockerfile: 'Dockerfile-22-bitnami'
       containerRepository: bitnami/keycloak
     ${{ else }}:
