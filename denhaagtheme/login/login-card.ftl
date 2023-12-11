@@ -5,7 +5,7 @@
     <#if provider.displayName??>
         <#list providerData?keys as key>
             <#if provider.displayName?lower_case?contains(key)>
-                <#assign providerType = key>
+                <#assign providerType = key?replace(" ", "")>
                 <#assign providerDataObj = providerData[key]>
                 <#assign imageSrc = providerDataObj.imageUrl>
                 <#assign footerSrc = providerDataObj.footerUrl>
@@ -17,8 +17,7 @@
     <#assign cardSubTitleLabel = msg(providerType + "LoginSubTitle")>
     <#assign cardImageAltLabel = msg(providerType + "LogoAltText")>
     <#assign cardLinkButtonAltLabel = msg(providerType + "LoginLinkButtonAltTitle")>
-    <#assign cardFooterLabelKey = providerType + "FooterText">
-    <#assign cardFooterLabel = msg(cardFooterLabelKey)>
+    <#assign cardFooterLabel = msg(providerType + "FooterText")>
     <#assign cardFooterLinkLabel = msg(providerType + "FooterLinkText")>
 
 
@@ -47,7 +46,8 @@
         <#if footerSrc != "" || cardFooterLabel != cardFooterLabelKey>
             <footer class="denhaag-card-authentication__footer">
                 <p class="utrecht-paragraph">
-                    ${cardFooterLabel} 
+                    ${cardFooterLabel}
+                    <br />
                     <#if footerSrc != "">
                         <a href="${footerSrc}" class="denhaag-link denhaag-link--with-icon denhaag-link--with-icon-end denhaag-link--external">
                             <span class="denhaag-link__icon">

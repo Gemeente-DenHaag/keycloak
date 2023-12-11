@@ -12,15 +12,18 @@
             <#assign eidasImg = "${url.resourcesPath}/img/eidas.svg">
 
             <#assign digid = "digid">
+            <#assign digidMachtigen = "digid machtigen">
             <#assign eHerkenning = "eherkenning">
+            <#assign eHerkenningBewindvoering = "eherkenning bewindvoering">
             <#assign eidas = "eidas">
             <#assign containsAuthorisedRegex = ".*(machtigen|bewindvoering).*">
             <#assign digidObj = {"imageUrl": digidImg, "footerUrl": "https://digid.nl "}>
-            <#assign digidGemachtigdeObj = {"imageUrl": digidImg, "footerUrl": "https://machtigen.digid.nl "}>
+            <#assign digidMachtigenObj = {"imageUrl": digidImg, "footerUrl": "https://machtigen.digid.nl "}>
             <#assign eHerkenningObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://eherkenning.nl/nl/eherkenning-aanvragen"}>
+            <#assign eHerkenningBewindvoeringObj = {"imageUrl": eHerkenningImg, "footerUrl": "https://bvd.mev.logius.nl/bewind/faq"}>
             <#assign eidasObj = {"imageUrl": eidasImg, "footerUrl": "https://www.government.nl/topics/online-access-to-public-services-european-economic-area-eidas/everything-you-need-to-know-about-eidas"}>
             <#assign staticProviderData = {digid: digidObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
-            <#assign staticAuthorisedProviderData = {digid: digidGemachtigdeObj, eHerkenning: eHerkenningObj, eidas: eidasObj}>
+            <#assign staticAuthorisedProviderData = {digidMachtigen: digidMachtigenObj, eHerkenningBewindvoering: eHerkenningBewindvoeringObj, eidas: eidasObj}>
             <#assign authorisedInfoNotification = {"type": "info", "summary": msg("authorisedNotification")}>
 
             <#-- Based on the current situation, where authorised provider aliases contains 'machtigen' or 'bewindvoering' -->
