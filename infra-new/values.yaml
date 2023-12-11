@@ -338,7 +338,7 @@ readinessProbe:
   enabled: true
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 1
+  timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
 ## When enabling this, make sure to set initialDelaySeconds to 0 for livenessProbe and readinessProbe
@@ -353,7 +353,7 @@ startupProbe:
   enabled: false
   initialDelaySeconds: 30
   periodSeconds: 5
-  timeoutSeconds: 1
+  timeoutSeconds: 5
   failureThreshold: 60
   successThreshold: 1
 ## @param customLivenessProbe Custom Liveness probes for Keycloak
