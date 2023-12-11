@@ -92,7 +92,7 @@ diagnosticMode:
 image:
   registry: crzgwpweu01.azurecr.io
   repository: bitnami/keycloak
-  tag: feature-bitnami-chart-be349be6-20231211154533
+  tag: develop-d68ba4be-20231212001531
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -325,7 +325,7 @@ livenessProbe:
   initialDelaySeconds: 300
   periodSeconds: 1
   timeoutSeconds: 5
-  failureThreshold: 3
+  failureThreshold: 6
   successThreshold: 1
 ## @param readinessProbe.enabled Enable readinessProbe on Keycloak containers
 ## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
@@ -339,7 +339,7 @@ readinessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
-  failureThreshold: 3
+  failureThreshold: 6
   successThreshold: 1
 ## When enabling this, make sure to set initialDelaySeconds to 0 for livenessProbe and readinessProbe
 ## @param startupProbe.enabled Enable startupProbe on Keycloak containers
