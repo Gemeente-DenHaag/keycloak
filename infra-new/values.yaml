@@ -74,7 +74,7 @@ extraDeploy:
       name: kv-zgw-ota-weu-01
       object:
         contentType: 'application/x-yaml'
-        name: keycloak2
+        name: keycloak2-dev
         type: multi-key-value-secret
     output:
       secret:
