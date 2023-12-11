@@ -48,7 +48,6 @@ stages:
         echo "buildtimestamp: $(buildTimeStamp)"
         echo "branchname: $(branchname)"
         echo "isRelease: $(isRelease)"
-        echo "isFeature: $(isFeature)"
         echo "dockerfile: $(dockerfile)"
         echo "containerRepository: $(containerRepository)"
         echo "pushDockerImage: $(pushDockerImage)"
