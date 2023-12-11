@@ -71,7 +71,7 @@ extraDeploy:
     name: keycloak2-akv2k8s
   spec:
     vault:
-      name: keycloak2
+      name: kv-zgw-ota-weu-01
       object:
         contentType: 'application/x-yaml'
         name: keycloak2
@@ -1117,11 +1117,11 @@ externalDatabase:
   database: 
   password: ""
   existingSecret: "keycloak2"
-  existingSecretHostKey: "KEYCLOAKDATABASEHOST"
-  existingSecretPortKey: "KEYCLOAKDATABASEPORT"
-  existingSecretUserKey: "KEYCLOAKDATABASEUSER"
-  existingSecretDatabaseKey: "KEYCLOAKDATABASENAME"
-  existingSecretPasswordKey: "KEYCLOAKDATABASEPASSWORD"
+  existingSecretHostKey: "KEYCLOAK_DATABASE_HOST"
+  existingSecretPortKey: "KEYCLOAK_DATABASE_PORT"
+  existingSecretUserKey: "KEYCLOAK_DATABASE_USER"
+  existingSecretDatabaseKey: "KEYCLOAK_DATABASE_NAME"
+  existingSecretPasswordKey: "KEYCLOAK_DATABASE_PASSWORD"
   annotations: {}
 
 ## @section Keycloak Cache parameters
