@@ -16,7 +16,6 @@ variables:
   containerRegistryUrl: crzgwpweu01.azurecr.io
   containerRepository: zgw/keycloak-with-theme
   releaseName: keycloak
-  isBitnamiFeature: $[contains(variables['Build.SourceBranch'], '/feature/bitnami')]
   tags: # will be set by script
   tag: # will be set by script
 
@@ -33,12 +32,9 @@ stages:
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
     isFeature: $[contains(variables['branchname'], 'feature/')]
-    # isBitnamiFeature: $[contains(variables['branchname'], 'feature/bitnami')]
-    ${{ if variables.isBitnamiFeature }}:
+    ${{ if variables.isFeature }}:
       dockerfile: 'Dockerfile-22-bitnami'
       containerRepository: bitnami/keycloak
-    ${{ elseif variables.isFeature }}:
-      dockerfile: 'Dockerfile-22'
     ${{ else }}:
       dockerfile: 'Dockerfile'
   jobs:
@@ -169,54 +165,30 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - ${{ if variables.isBitnamiFeature }}:
-            - task: HelmDeploy@0
-              displayName: 'Add helm repo'
-              inputs:
-                connectionType: 'Kubernetes Service Connection'
-                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-                namespace: '$(namespace)'
-                command: 'repo'
-                arguments: 'add bitnami https://charts.bitnami.com/bitnami'
 
-            - task: HelmDeploy@0
-              displayName: 'Deploy with helm'
-              inputs:
-                connectionType: 'Kubernetes Service Connection'
-                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-                namespace: '$(namespace)'
-                command: 'upgrade'
-                chartType: 'Name'
-                chartName: 'bitnami/keycloak'
-                releaseName: '$(releaseName)'
-                overrideValues: 'image.tag=$(tag)'
-                install: true
-                waitForExecution: true
-                arguments: '-f infra-new/values.yaml -f infra-new/values-dev.yaml --version 17.3.6'
-          - ${{ else }}:
-            - task: HelmDeploy@0
-              displayName: 'Add helm repo'
-              inputs:
-                connectionType: 'Kubernetes Service Connection'
-                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-                namespace: '$(namespace)'
-                command: 'repo'
-                arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add bitnami https://charts.bitnami.com/bitnami'
 
-            - task: HelmDeploy@0
-              displayName: 'Deploy with helm'
-              inputs:
-                connectionType: 'Kubernetes Service Connection'
-                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-                namespace: '$(namespace)'
-                command: 'upgrade'
-                chartType: 'Name'
-                chartName: 'denhaag/generic'
-                releaseName: '$(releaseName)'
-                overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
-                install: true
-                waitForExecution: true
-                arguments: '-f infra/values.yaml -f infra/values-dev.yaml --atomic'
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'bitnami/keycloak'
+              releaseName: '$(releaseName)'
+              overrideValues: 'image.tag=$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra-new/values.yaml -f infra-new/values-dev.yaml --version 17.3.6'
 
 - stage: DeployToTest
   dependsOn: Build
