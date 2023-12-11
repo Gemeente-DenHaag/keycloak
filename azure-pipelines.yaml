@@ -192,7 +192,7 @@ stages:
                 overrideValues: 'image.tag=$(tag)'
                 install: true
                 waitForExecution: true
-                arguments: '-f infra-new/values.yaml'
+                arguments: '-f infra-new/values.yaml -f infra-new/values-dev.yaml --version 17.3.6'
           - ${{ else }}:
             - task: HelmDeploy@0
               displayName: 'Add helm repo'
