@@ -34,6 +34,9 @@ stages:
     ${{ if contains(variables['Build.SourceBranch'], '/feature/') }}:
       dockerfile: 'Dockerfile-22-bitnami'
       containerRepository: bitnami/keycloak
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'develop') }}:
+      dockerfile: 'Dockerfile-22-bitnami'
+      containerRepository: bitnami/keycloak
     ${{ else }}:
       dockerfile: 'Dockerfile'
   jobs:
@@ -215,7 +218,7 @@ stages:
               kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
               namespace: '$(namespace)'
               command: 'repo'
-              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+              arguments: 'add bitnami https://charts.bitnami.com/bitnami'
 
           - task: HelmDeploy@0
             displayName: 'Deploy with helm'
@@ -225,12 +228,12 @@ stages:
               namespace: '$(namespace)'
               command: 'upgrade'
               chartType: 'Name'
-              chartName: 'denhaag/generic'
+              chartName: 'bitnami/keycloak'
               releaseName: '$(releaseName)'
-              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra/values.yaml -f infra/values-test.yaml --atomic'
+              arguments: '-f infra-new/values.yaml -f infra-new/values-test.yaml --version 17.3.6'
 
 - stage: DeployToAcc
   dependsOn: Build
