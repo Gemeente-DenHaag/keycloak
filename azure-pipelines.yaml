@@ -32,7 +32,11 @@ stages:
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
     isFeature: $[contains(variables['branchname'], 'feature/')]
-    ${{ if variables.isFeature }}:
+    isBitnamiFeature: $[contains(variables['branchname'], 'feature/bitnami')]
+    ${{ if variables.isBitnamiFeature }}:
+      dockerfile: 'Dockerfile-22-bitnami'
+      containerRepository: bitnami/keycloak
+    ${{ elseif variables.isFeature }}:
       dockerfile: 'Dockerfile-22'
     ${{ else }}:
       dockerfile: 'Dockerfile'
@@ -50,6 +54,7 @@ stages:
         echo "isRelease: $(isRelease)"
         echo "isFeature: $(isFeature)"
         echo "dockerfile: $(dockerfile)"
+        echo "containerRepository: $(containerRepository)"
         echo "pushDockerImage: $(pushDockerImage)"
         echo "shortSha: $(shortSha)"
         
@@ -163,7 +168,31 @@ stages:
         deploy:
           steps:
           - checkout: self
+          ${{ if variables.isBitnamiFeature }}:
+          - task: HelmDeploy@0
+            displayName: 'Add helm repo'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'repo'
+              arguments: 'add bitnami https://charts.bitnami.com/bitnami'
 
+          - task: HelmDeploy@0
+            displayName: 'Deploy with helm'
+            inputs:
+              connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+              namespace: '$(namespace)'
+              command: 'upgrade'
+              chartType: 'Name'
+              chartName: 'bitnami/keycloak'
+              releaseName: 'keycloak2'
+              # overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+              install: true
+              waitForExecution: true
+              arguments: '-f infra-new/values.yaml'
+          ${{ else }}:
           - task: HelmDeploy@0
             displayName: 'Add helm repo'
             inputs:
