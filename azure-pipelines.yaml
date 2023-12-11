@@ -169,54 +169,54 @@ stages:
         deploy:
           steps:
           - checkout: self
-          ${{ if variables.isBitnamiFeature }}:
-          - task: HelmDeploy@0
-            displayName: 'Add helm repo'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-              namespace: '$(namespace)'
-              command: 'repo'
-              arguments: 'add bitnami https://charts.bitnami.com/bitnami'
+          - ${{ if variables.isBitnamiFeature }}:
+            - task: HelmDeploy@0
+              displayName: 'Add helm repo'
+              inputs:
+                connectionType: 'Kubernetes Service Connection'
+                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+                namespace: '$(namespace)'
+                command: 'repo'
+                arguments: 'add bitnami https://charts.bitnami.com/bitnami'
 
-          - task: HelmDeploy@0
-            displayName: 'Deploy with helm'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-              namespace: '$(namespace)'
-              command: 'upgrade'
-              chartType: 'Name'
-              chartName: 'bitnami/keycloak'
-              releaseName: 'keycloak2'
-              # overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
-              install: true
-              waitForExecution: true
-              arguments: '-f infra-new/values.yaml'
-          ${{ else }}:
-          - task: HelmDeploy@0
-            displayName: 'Add helm repo'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-              namespace: '$(namespace)'
-              command: 'repo'
-              arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
+            - task: HelmDeploy@0
+              displayName: 'Deploy with helm'
+              inputs:
+                connectionType: 'Kubernetes Service Connection'
+                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+                namespace: '$(namespace)'
+                command: 'upgrade'
+                chartType: 'Name'
+                chartName: 'bitnami/keycloak'
+                releaseName: 'keycloak2'
+                # overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+                install: true
+                waitForExecution: true
+                arguments: '-f infra-new/values.yaml'
+          - ${{ else }}:
+            - task: HelmDeploy@0
+              displayName: 'Add helm repo'
+              inputs:
+                connectionType: 'Kubernetes Service Connection'
+                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+                namespace: '$(namespace)'
+                command: 'repo'
+                arguments: 'add denhaag https://gemeente-denhaag.github.io/helm-charts'
 
-          - task: HelmDeploy@0
-            displayName: 'Deploy with helm'
-            inputs:
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
-              namespace: '$(namespace)'
-              command: 'upgrade'
-              chartType: 'Name'
-              chartName: 'denhaag/generic'
-              releaseName: '$(releaseName)'
-              overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
-              install: true
-              waitForExecution: true
-              arguments: '-f infra/values.yaml -f infra/values-dev.yaml --atomic'
+            - task: HelmDeploy@0
+              displayName: 'Deploy with helm'
+              inputs:
+                connectionType: 'Kubernetes Service Connection'
+                kubernetesServiceConnection: '${{ variables.kubernetesServiceConnection }}'
+                namespace: '$(namespace)'
+                command: 'upgrade'
+                chartType: 'Name'
+                chartName: 'denhaag/generic'
+                releaseName: '$(releaseName)'
+                overrideValues: 'image.fullImage=$(containerRegistryUrl)/$(containerRepository):$(tag)'
+                install: true
+                waitForExecution: true
+                arguments: '-f infra/values.yaml -f infra/values-dev.yaml --atomic'
 
 - stage: DeployToTest
   dependsOn: Build
