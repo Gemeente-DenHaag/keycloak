@@ -110,7 +110,7 @@ diagnosticMode:
 image:
   registry: crzgwpweu01.azurecr.io
   repository: bitnami/keycloak
-  tag: 22.0.5
+  tag: feature-bitnami-chart-be349be6-20231211154533
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -330,8 +330,14 @@ containerSecurityContext:
 ## @param resources.requests The requested resources for the Keycloak containers
 ##
 resources:
-  limits: {}
-  requests: {}
+  # limits: {}
+  # requests: {}
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 500Mi
 ## Configure extra options for Keycloak containers' liveness, readiness and startup probes
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#configure-probes
 ## @param livenessProbe.enabled Enable livenessProbe on Keycloak containers
@@ -525,8 +531,8 @@ service:
   ## @param service.ports.https Keycloak service HTTPS port
   ##
   ports:
-    http: 80
-    https: 443
+    http: 8080
+    https: 8443
   ## @param service.nodePorts [object] Specify the nodePort values for the LoadBalancer and NodePort service types.
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
   ##
@@ -603,7 +609,7 @@ ingress:
   apiVersion: ""
   ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
-  hostname: keycloak.local
+  hostname: keycloak2-zgw.dev.denhaag.nl
   ## @param ingress.path [string] Default path for the ingress record (evaluated as template)
   ##
   path: "{{ .Values.httpRelativePath }}"
