@@ -16,6 +16,7 @@ variables:
   containerRegistryUrl: crzgwpweu01.azurecr.io
   containerRepository: zgw/keycloak-with-theme
   releaseName: keycloak
+  isBitnamiFeature: $[contains(variables['Build.SourceBranch'], '/feature/bitnami')]
   tags: # will be set by script
   tag: # will be set by script
 
@@ -32,7 +33,7 @@ stages:
     pushDockerImage: $[and(ne(variables['Build.Reason'], 'PullRequest'), ne(variables['build.sourceBranchName'], 'main'))] # Don't push image when pr, main
     shortSha: ${BUILD_SOURCEVERSION::8} # Get first 8 characters from sha
     isFeature: $[contains(variables['branchname'], 'feature/')]
-    isBitnamiFeature: $[contains(variables['branchname'], 'feature/bitnami')]
+    # isBitnamiFeature: $[contains(variables['branchname'], 'feature/bitnami')]
     ${{ if variables.isBitnamiFeature }}:
       dockerfile: 'Dockerfile-22-bitnami'
       containerRepository: bitnami/keycloak
