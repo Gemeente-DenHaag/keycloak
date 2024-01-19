@@ -61,7 +61,7 @@ extraDeploy:
 # extraEnvVars: []
 extraEnvVars:
 - name: KC_FEATURES
-  value: admin-fine-grained-authz,token-exchange
+  value: token-exchange,admin-fine-grained-authz
 - name: KC_HOSTNAME
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
