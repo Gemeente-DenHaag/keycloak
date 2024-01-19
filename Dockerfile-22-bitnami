@@ -1,9 +1,24 @@
+FROM bitnami/keycloak:22.0.5 as builder
+WORKDIR /opt/bitnami/keycloak
+
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
+ENV KC_DB=postgres
+
+COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
+
+RUN bin/kc.sh build
+
 FROM bitnami/keycloak:22.0.5
 WORKDIR /opt/bitnami/keycloak
 
-COPY ./denhaagtheme/ themes/denhaagtheme/
-COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
+COPY --from=builder /opt/bitnami/keycloak/lib/quarkus/ lib/quarkus/
+COPY --from=builder /opt/bitnami/keycloak/providers/ providers/
 
+COPY ./denhaagtheme/ themes/denhaagtheme/
+
+# ENTRYPOINT ["/opt/keycloak/bin/kc.sh", "start"]
 
 # FROM quay.io/keycloak/keycloak:22.0 as builder
 # ENV KC_HEALTH_ENABLED=true
