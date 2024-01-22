@@ -62,6 +62,8 @@ env:
     value: '{{ .Values.ingress.hostname }}'
   - name: KC_LOG_LEVEL
     value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+  - name: KC_DB
+    value: postgres
     # value: INFO,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
     # value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO,io.quarkus.vertx.http:INFO,org.postgresql.jdbc:INFO
   # - name: KEYCLOAK_LOG_LEVEL
