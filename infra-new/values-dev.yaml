@@ -66,6 +66,8 @@ extraEnvVars:
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
   value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+- name: KC_DB
+  value: postgres
 
 ## @param replicaCount Number of Keycloak replicas to deploy
 ##
