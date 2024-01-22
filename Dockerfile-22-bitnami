@@ -6,8 +6,8 @@ WORKDIR /opt/bitnami/keycloak
 ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
 
-COPY ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
-COPY ./denhaagtheme/ themes/denhaagtheme/
+ADD --chown=keycloak:keycloak ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
+ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
 RUN bin/kc.sh build
 
