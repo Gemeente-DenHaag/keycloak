@@ -21,4 +21,4 @@ WORKDIR /opt/bitnami/keycloak
 
 
 
-ENTRYPOINT ["/opt/bitnami/keycloak/bin/kc.sh", "start --optimized"]
+# ENTRYPOINT ["/opt/bitnami/keycloak/bin/kc.sh", "start --optimized"]
