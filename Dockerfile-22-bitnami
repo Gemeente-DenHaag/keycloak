@@ -11,7 +11,8 @@ ENV KC_CACHE=ispn
 ADD --chown=keycloak:keycloak ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
 ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
-RUN bin/kc.sh build -cf conf/keycloak.conf
+# RUN bin/kc.sh build -cf conf/keycloak.conf
+RUN bin/kc.sh build
 
 FROM bitnami/keycloak:22.0.5
 
