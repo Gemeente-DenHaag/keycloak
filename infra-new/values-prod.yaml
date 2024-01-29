@@ -1,3 +1,6 @@
+podLabels:
+  public-access: allow
+
 ## @param extraDeploy Array of extra objects to deploy with the release
 ##
 # extraDeploy: []
@@ -8,10 +11,10 @@ extraDeploy:
     name: keycloak-akv2k8s
   spec:
     vault:
-      name: kv-zgw-ota-weu-01
+      name: kv-zgw-p-weu-01
       object:
         contentType: 'application/x-yaml'
-        name: keycloak-dev
+        name: keycloak-prod
         type: multi-key-value-secret
     output:
       secret:
@@ -19,25 +22,21 @@ extraDeploy:
 - apiVersion: networking.k8s.io/v1
   kind: Ingress
   metadata:
-    name: '{{ include "common.names.fullname" . }}-ext'
+    name: '{{ include "common.names.fullname" . }}-ag'
     namespace: '{{ include "common.names.namespace" . }}'
-    # labels:
-    #   app.kubernetes.io/component: keycloak
-    #   app.kubernetes.io/instance: keycloak
-    #   app.kubernetes.io/managed-by: Helm
-    #   app.kubernetes.io/name: keycloak
-    #   helm.sh/chart: keycloak-17.3.6
     annotations:
-      kubernetes.io/ingress.class: azure/application-gateway-ext
+      # kubernetes.io/ingress.class: azure/application-gateway
       appgw.ingress.kubernetes.io/ssl-redirect: 'true'
-      appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      # appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
       meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
       meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
   spec:
+    ingressClassName: azure-application-gateway
     tls:
     - hosts:
       - '{{ .Values.ingress.hostname }}'
-      secretName: sterdevdenhaagnl-tls
+      secretName: zgw3-tls-secret
     rules:
       - host: '{{ .Values.ingress.hostname }}'
         http:
@@ -48,7 +47,7 @@ extraDeploy:
                 service:
                   name: '{{ include "common.names.fullname" . }}'
                   port:
-                    name: http
+                    number: 8080
 
 ## @section Keycloak parameters
 
@@ -66,15 +65,13 @@ extraEnvVars:
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
   value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
-# - name: KC_DB
-#   value: postgres
 # to fix logout for klantportaal:
 - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
   value: 'true'
 
 ## @param replicaCount Number of Keycloak replicas to deploy
 ##
-replicaCount: 1
+replicaCount: 2
 
 ## Keycloak ingress parameters
 ## ref: https://kubernetes.io/docs/user-guide/ingress/
@@ -82,7 +79,12 @@ replicaCount: 1
 ingress:
   ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
-  hostname: keycloak-zgw.dev.denhaag.nl
+  hostname: keycloak.denhaag.nl
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ##
+  ingressClassName: nginx
   ## @param ingress.annotations [object] Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
   ## Use this parameter to set the required annotations for cert-manager, see
   ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
@@ -93,9 +95,9 @@ ingress:
   ##
   # annotations: {}
   annotations:
-    kubernetes.io/ingress.class: azure/application-gateway-int
-    appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+    # kubernetes.io/ingress.class: azure/application-gateway-int
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
   ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
   ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
   ## extraTls:
@@ -106,8 +108,8 @@ ingress:
   # extraTls: []
   extraTls:
   - hosts:
-    - keycloak-zgw.dev.denhaag.nl
-    secretName: sterdevdenhaagnl-tls
+    - keycloak.denhaag.nl
+    secretName: zgw4-tls-secret
 
 ## @section Other parameters
 ##
@@ -118,7 +120,7 @@ ingress:
 pdb:
   ## @param pdb.create Enable/disable a Pod Disruption Budget creation
   ##
-  create: false
+  create: true
   ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
   ##
   minAvailable: 1

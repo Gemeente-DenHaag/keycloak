@@ -92,7 +92,7 @@ diagnosticMode:
 image:
   registry: crzgwpweu01.azurecr.io
   repository: bitnami/keycloak
-  tag: develop-d68ba4be-20231212001531
+  tag: 
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -122,7 +122,6 @@ auth:
   adminPassword: ""
   ## @param auth.existingSecret Existing secret containing Keycloak admin password
   ##
-  # existingSecret: "keycloak2"
   existingSecret: "keycloak"
   ## @param auth.passwordSecretKey Key where the Keycloak admin password is being stored inside the existing secret.
   ##
