@@ -3,7 +3,6 @@ podLabels:
 
 ## @param extraDeploy Array of extra objects to deploy with the release
 ##
-# extraDeploy: []
 extraDeploy:
 - apiVersion: spv.no/v2beta1
   kind: AzureKeyVaultSecret
@@ -47,7 +46,7 @@ extraDeploy:
                 service:
                   name: '{{ include "common.names.fullname" . }}'
                   port:
-                    number: 8080
+                    name: http
 
 ## @section Keycloak parameters
 
@@ -65,6 +64,8 @@ extraEnvVars:
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
   value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
+- name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
+  value: 'true'
 # to fix logout for klantportaal:
 - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
   value: 'true'

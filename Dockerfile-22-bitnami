@@ -1,7 +1,7 @@
 FROM bitnami/keycloak:22.0.5 as builder
 WORKDIR /opt/bitnami/keycloak
 
-# ENV KC_HEALTH_ENABLED=true
+ENV KC_HEALTH_ENABLED=true
 # ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
