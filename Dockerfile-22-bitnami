@@ -16,7 +16,7 @@ RUN bin/kc.sh build
 
 FROM bitnami/keycloak:22.0.5
 
-COPY --from=builder /opt/bitnami/keycloak/ /opt/bitnami/keycloak/
+COPY --chown=keycloak:keycloak --from=builder /opt/bitnami/keycloak/ /opt/bitnami/keycloak/
 
 WORKDIR /opt/bitnami/keycloak
 # COPY --from=builder /opt/bitnami/keycloak/lib/quarkus/ lib/quarkus/
