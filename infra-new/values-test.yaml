@@ -23,6 +23,10 @@ extraDeploy:
   metadata:
     name: '{{ include "common.names.fullname" . }}-ag'
     namespace: '{{ include "common.names.namespace" . }}'
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
     annotations:
       appgw.ingress.kubernetes.io/ssl-redirect: 'true'
       appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
