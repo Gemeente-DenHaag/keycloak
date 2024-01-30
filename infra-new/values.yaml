@@ -288,10 +288,9 @@ podSecurityContext:
 containerSecurityContext:
   enabled: true
   runAsUser: 1001
-  runAsGroup: 1000
   runAsNonRoot: true
   privileged: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   capabilities:
     drop: ["ALL"]
@@ -441,7 +440,7 @@ tolerations: []
 topologySpreadConstraints: []
 ## @param podManagementPolicy Pod management policy for the Keycloak statefulset
 ##
-podManagementPolicy: Parallel
+podManagementPolicy: OrderedReady
 ## @param priorityClassName Keycloak pods' Priority Class Name
 ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
 ##
@@ -473,9 +472,7 @@ extraVolumeMounts:
   name: tmpfs-1
 - mountPath: /opt/bitnami/keycloak/data/tmp
   name: tmpfs-1
-# - mountPath: /opt/bitnami/keycloak/conf/keycloak.conf
-#   name: tmpfs-1
-# - mountPath: /opt/bitnami/keycloak/conf/cache-ispn.xml
+# - mountPath: /opt/bitnami/keycloak/conf
 #   name: tmpfs-1
 # - mountPath: /opt/bitnami/keycloak/lib/quarkus
 #   name: tmpfs-1

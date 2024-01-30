@@ -26,8 +26,8 @@ extraDeploy:
       app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway-ext
-      appgw.ingress.kubernetes.io/health-probe-path: "/health"
       appgw.ingress.kubernetes.io/ssl-redirect: 'true'
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
       appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
       meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
       meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
@@ -60,7 +60,6 @@ tolerations:
 ##   - name: FOO
 ##     value: "bar"
 ##
-# extraEnvVars: []
 extraEnvVars:
 - name: KC_FEATURES
   value: token-exchange,admin-fine-grained-authz
@@ -70,12 +69,6 @@ extraEnvVars:
   value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
 - name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
   value: 'true'
-# - name: KEYCLOAK_DAEMON_USER
-#   value: keycloak
-# - name: KEYCLOAK_DAEMON_GROUP
-#   value: keycloak
-# - name: KC_DB
-#   value: postgres
 # to fix logout for klantportaal:
 - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
   value: 'true'
@@ -99,7 +92,6 @@ ingress:
   ##   kubernetes.io/ingress.class: nginx
   ##   cert-manager.io/cluster-issuer: cluster-issuer-name
   ##
-  # annotations: {}
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway-int
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
@@ -111,7 +103,6 @@ ingress:
   ##     - keycloak.local
   ##   secretName: keycloak.local-tls
   ##
-  # extraTls: []
   extraTls:
   - hosts:
     - keycloak-zgw.dev.denhaag.nl
