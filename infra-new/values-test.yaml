@@ -3,7 +3,6 @@ podLabels:
 
 ## @param extraDeploy Array of extra objects to deploy with the release
 ##
-# extraDeploy: []
 extraDeploy:
 - apiVersion: spv.no/v2beta1
   kind: AzureKeyVaultSecret
@@ -24,11 +23,14 @@ extraDeploy:
   metadata:
     name: '{{ include "common.names.fullname" . }}-ag'
     namespace: '{{ include "common.names.namespace" . }}'
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
     annotations:
-      # kubernetes.io/ingress.class: azure/application-gateway
       appgw.ingress.kubernetes.io/ssl-redirect: 'true'
       appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
-      # appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
       meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
       meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
   spec:
@@ -57,14 +59,18 @@ extraDeploy:
 ##   - name: FOO
 ##     value: "bar"
 ##
-# extraEnvVars: []
 extraEnvVars:
 - name: KC_FEATURES
-  value: admin-fine-grained-authz,token-exchange
+  value: token-exchange,admin-fine-grained-authz
 - name: KC_HOSTNAME
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
-  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
+- name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
+  value: 'true'
+# to fix logout for klantportaal:
+- name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
+  value: 'true'
 
 ## @param replicaCount Number of Keycloak replicas to deploy
 ##
@@ -90,11 +96,8 @@ ingress:
   ##   kubernetes.io/ingress.class: nginx
   ##   cert-manager.io/cluster-issuer: cluster-issuer-name
   ##
-  # annotations: {}
   annotations:
-    # kubernetes.io/ingress.class: azure/application-gateway-int
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
   ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
   ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
   ## extraTls:
@@ -102,7 +105,6 @@ ingress:
   ##     - keycloak.local
   ##   secretName: keycloak.local-tls
   ##
-  # extraTls: []
   extraTls:
   - hosts:
     - keycloak-zgw.test.denhaag.nl

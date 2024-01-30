@@ -92,7 +92,7 @@ diagnosticMode:
 image:
   registry: crzgwpweu01.azurecr.io
   repository: bitnami/keycloak
-  tag: develop-d68ba4be-20231212001531
+  tag: 
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -109,7 +109,7 @@ image:
   pullSecrets: []
   ## Set to true if you would like to see extra information on logs
   ##
-  debug: false
+  debug: true
 ## Keycloak authentication parameters
 ## ref: https://github.com/bitnami/containers/tree/main/bitnami/keycloak#admin-credentials
 ##
@@ -122,7 +122,6 @@ auth:
   adminPassword: ""
   ## @param auth.existingSecret Existing secret containing Keycloak admin password
   ##
-  # existingSecret: "keycloak2"
   existingSecret: "keycloak"
   ## @param auth.passwordSecretKey Key where the Keycloak admin password is being stored inside the existing secret.
   ##
@@ -226,7 +225,7 @@ configuration: ""
 existingConfigmap: ""
 ## @param extraStartupArgs Extra default startup args
 ##
-extraStartupArgs: ""
+extraStartupArgs: "--optimized"
 ## @param initdbScripts Dictionary of initdb scripts
 ## Specify dictionary of scripts to be run at first boot
 ## ref: https://github.com/bitnami/containers/tree/main/bitnami/keycloak#initializing-a-new-instance
@@ -303,8 +302,6 @@ containerSecurityContext:
 ## @param resources.requests The requested resources for the Keycloak containers
 ##
 resources:
-  # limits: {}
-  # requests: {}
   limits:
     cpu: 1
     memory: 1Gi
@@ -321,10 +318,10 @@ resources:
 ## @param livenessProbe.successThreshold Success threshold for livenessProbe
 ##
 livenessProbe:
-  enabled: true
-  initialDelaySeconds: 300
+  enabled: false
+  initialDelaySeconds: 30
   periodSeconds: 1
-  timeoutSeconds: 5
+  timeoutSeconds: 10
   failureThreshold: 6
   successThreshold: 1
 ## @param readinessProbe.enabled Enable readinessProbe on Keycloak containers
@@ -335,7 +332,7 @@ livenessProbe:
 ## @param readinessProbe.successThreshold Success threshold for readinessProbe
 ##
 readinessProbe:
-  enabled: true
+  enabled: false
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
@@ -358,10 +355,28 @@ startupProbe:
   successThreshold: 1
 ## @param customLivenessProbe Custom Liveness probes for Keycloak
 ##
-customLivenessProbe: {}
+customLivenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 60
+  periodSeconds: 1
+  timeoutSeconds: 10
+  failureThreshold: 6
+  successThreshold: 1
 ## @param customReadinessProbe Custom Rediness probes Keycloak
 ##
-customReadinessProbe: {}
+customReadinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
 ## @param customStartupProbe Custom Startup probes for Keycloak
 ##
 customStartupProbe: {}
@@ -418,19 +433,14 @@ nodeSelector: {}
 ## @param tolerations Tolerations for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 ##
-# tolerations: []
-tolerations:
-- key: "zgwo01"
-  operator: "Equal"
-  value: "true"
-  effect: "NoSchedule"
+tolerations: []
 ## @param topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
 ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
 ##
 topologySpreadConstraints: []
 ## @param podManagementPolicy Pod management policy for the Keycloak statefulset
 ##
-podManagementPolicy: Parallel
+podManagementPolicy: OrderedReady
 ## @param priorityClassName Keycloak pods' Priority Class Name
 ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
 ##
@@ -452,13 +462,11 @@ updateStrategy:
   rollingUpdate: {}
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pods
 ##
-# extraVolumes: []
 extraVolumes:
 - name: tmpfs-1
   emptyDir: {}
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
 ##
-# extraVolumeMounts: []
 extraVolumeMounts:
 - mountPath: /tmp
   name: tmpfs-1
