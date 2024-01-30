@@ -288,9 +288,10 @@ podSecurityContext:
 containerSecurityContext:
   enabled: true
   runAsUser: 1001
+  runAsGroup: 1000
   runAsNonRoot: true
   privileged: false
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
     drop: ["ALL"]
