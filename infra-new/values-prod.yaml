@@ -41,13 +41,34 @@ extraDeploy:
       - host: '{{ .Values.ingress.hostname }}'
         http:
           paths:
-            - path: /
-              pathType: ImplementationSpecific
-              backend:
-                service:
-                  name: '{{ include "common.names.fullname" . }}'
-                  port:
-                    number: 8080
+          - path: /js/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  number: 8080
+          - path: /realms/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  number: 8080
+          - path: /resources/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  number: 8080
+          - path: /robots.txt
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  number: 8080
 
 ## @section Keycloak parameters
 
@@ -64,7 +85,7 @@ extraEnvVars:
 - name: KC_HOSTNAME
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
-  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
 # to fix logout for klantportaal:
 - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
   value: 'true'

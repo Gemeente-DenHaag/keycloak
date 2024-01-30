@@ -21,12 +21,10 @@ extraDeploy:
   metadata:
     name: '{{ include "common.names.fullname" . }}-ext'
     namespace: '{{ include "common.names.namespace" . }}'
-    # labels:
-    #   app.kubernetes.io/component: keycloak
-    #   app.kubernetes.io/instance: keycloak
-    #   app.kubernetes.io/managed-by: Helm
-    #   app.kubernetes.io/name: keycloak
-    #   helm.sh/chart: keycloak-17.3.6
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway-ext
       appgw.ingress.kubernetes.io/ssl-redirect: 'true'
@@ -51,7 +49,11 @@ extraDeploy:
                     name: http
 
 ## @section Keycloak parameters
-
+tolerations:
+- key: "zgwo01"
+  operator: "Equal"
+  value: "true"
+  effect: "NoSchedule"
 ## @param extraEnvVars Extra environment variables to be set on Keycloak container
 ## Example:
 ## extraEnvVars:
