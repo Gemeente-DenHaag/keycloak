@@ -321,9 +321,13 @@ resources:
 ##
 livenessProbe:
   enabled: true
+  httpGet:
+    path: /health/live
+    port: http
+    scheme: HTTP
   initialDelaySeconds: 300
   periodSeconds: 1
-  timeoutSeconds: 5
+  timeoutSeconds: 10
   failureThreshold: 6
   successThreshold: 1
 ## @param readinessProbe.enabled Enable readinessProbe on Keycloak containers
@@ -335,6 +339,10 @@ livenessProbe:
 ##
 readinessProbe:
   enabled: true
+  httpGet:
+    path: /health/ready
+    port: http
+    scheme: HTTP
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
