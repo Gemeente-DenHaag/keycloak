@@ -472,8 +472,8 @@ extraVolumeMounts:
   name: tmpfs-1
 - mountPath: /opt/bitnami/keycloak/data/tmp
   name: tmpfs-1
-- mountPath: /opt/bitnami/keycloak/conf/keycloak.conf
-  name: tmpfs-1
+# - mountPath: /opt/bitnami/keycloak/conf/keycloak.conf
+#   name: tmpfs-1
 # - mountPath: /opt/bitnami/keycloak/conf/cache-ispn.xml
 #   name: tmpfs-1
 # - mountPath: /opt/bitnami/keycloak/lib/quarkus
