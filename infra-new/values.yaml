@@ -290,7 +290,7 @@ containerSecurityContext:
   runAsUser: 1001
   runAsNonRoot: true
   privileged: false
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
     drop: ["ALL"]
@@ -302,8 +302,6 @@ containerSecurityContext:
 ## @param resources.requests The requested resources for the Keycloak containers
 ##
 resources:
-  # limits: {}
-  # requests: {}
   limits:
     cpu: 1
     memory: 1Gi
@@ -321,11 +319,7 @@ resources:
 ##
 livenessProbe:
   enabled: false
-  httpGet:
-    path: /health/live
-    port: http
-    scheme: HTTP
-  initialDelaySeconds: 300
+  initialDelaySeconds: 30
   periodSeconds: 1
   timeoutSeconds: 10
   failureThreshold: 6
@@ -339,10 +333,6 @@ livenessProbe:
 ##
 readinessProbe:
   enabled: false
-  httpGet:
-    path: /health/ready
-    port: http
-    scheme: HTTP
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
@@ -472,13 +462,11 @@ updateStrategy:
   rollingUpdate: {}
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pods
 ##
-# extraVolumes: []
 extraVolumes:
 - name: tmpfs-1
   emptyDir: {}
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
 ##
-# extraVolumeMounts: []
 extraVolumeMounts:
 - mountPath: /tmp
   name: tmpfs-1
