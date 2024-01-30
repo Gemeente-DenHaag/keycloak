@@ -70,6 +70,10 @@ extraEnvVars:
   value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
 - name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
   value: 'true'
+- name: KEYCLOAK_DAEMON_USER
+  value: keycloak
+- name: KEYCLOAK_DAEMON_GROUP
+  value: keycloak
 # - name: KC_DB
 #   value: postgres
 # to fix logout for klantportaal:
