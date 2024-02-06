@@ -9,7 +9,9 @@ ENV KC_DB=postgres
 # ENV KC_CACHE=ispn
 ENV KEYCLOAK_DAEMON_USER=keycloak
 ENV KEYCLOAK_DAEMON_GROUP=keycloak
-
+# ENV KEYCLOAK_MOUNTED_CONF_DIR=/keycloak/conf
+## needed because of readonlyrootfilesystem
+# COPY --chown=keycloak:keycloak ./conf defaultconf/
 ADD --chown=keycloak:keycloak ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
 ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 

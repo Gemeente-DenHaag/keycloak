@@ -47,6 +47,165 @@ extraDeploy:
                   name: '{{ include "common.names.fullname" . }}'
                   port:
                     name: http
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    name: '{{ include "common.names.fullname" . }}-cache-ispn-xml'
+    namespace: '{{ include "common.names.namespace" . }}'
+  data:
+    cache-ispn.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!--
+      ~ Copyright 2019 Red Hat, Inc. and/or its affiliates
+      ~ and other contributors as indicated by the @author tags.
+      ~
+      ~ Licensed under the Apache License, Version 2.0 (the "License");
+      ~ you may not use this file except in compliance with the License.
+      ~ You may obtain a copy of the License at
+      ~
+      ~ http://www.apache.org/licenses/LICENSE-2.0
+      ~
+      ~ Unless required by applicable law or agreed to in writing, software
+      ~ distributed under the License is distributed on an "AS IS" BASIS,
+      ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      ~ See the License for the specific language governing permissions and
+      ~ limitations under the License.
+      -->
+
+      <infinispan xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="urn:infinispan:config:14.0 http://www.infinispan.org/schemas/infinispan-config-14.0.xsd"
+                  xmlns="urn:infinispan:config:14.0">
+        <cache-container name="keycloak">
+          <transport lock-timeout="60000"/>
+          <local-cache name="realms"
+                      simple-cache="true">
+            <encoding>
+              <key media-type="application/x-java-object"/>
+              <value media-type="application/x-java-object"/>
+            </encoding>
+            <memory max-count="10000"/>
+          </local-cache>
+          <local-cache name="users"
+                      simple-cache="true">
+            <encoding>
+              <key media-type="application/x-java-object"/>
+              <value media-type="application/x-java-object"/>
+            </encoding>
+            <memory max-count="10000"/>
+          </local-cache>
+          <distributed-cache name="sessions"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <distributed-cache name="authenticationSessions"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <distributed-cache name="offlineSessions"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <distributed-cache name="clientSessions"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <distributed-cache name="offlineClientSessions"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <distributed-cache name="loginFailures"
+                            owners="2">
+            <expiration lifespan="-1"/>
+          </distributed-cache>
+          <local-cache name="authorization"
+                      simple-cache="true">
+            <encoding>
+              <key media-type="application/x-java-object"/>
+              <value media-type="application/x-java-object"/>
+            </encoding>
+            <memory max-count="10000"/>
+          </local-cache>
+          <replicated-cache name="work">
+            <expiration lifespan="-1"/>
+          </replicated-cache>
+          <local-cache name="keys"
+                      simple-cache="true">
+            <encoding>
+              <key media-type="application/x-java-object"/>
+              <value media-type="application/x-java-object"/>
+            </encoding>
+            <expiration max-idle="3600000"/>
+            <memory max-count="1000"/>
+          </local-cache>
+          <distributed-cache name="actionTokens"
+                            owners="2">
+            <encoding>
+              <key media-type="application/x-java-object"/>
+              <value media-type="application/x-java-object"/>
+            </encoding>
+            <expiration max-idle="-1"
+                        lifespan="-1"
+                        interval="300000"/>
+            <memory max-count="-1"/>
+          </distributed-cache>
+        </cache-container>
+      </infinispan>
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    name: '{{ include "common.names.fullname" . }}-keycloak-conf'
+    namespace: '{{ include "common.names.namespace" . }}'
+  data:
+    keycloak.conf: |
+      # Basic settings for running in production. Change accordingly before deploying the server.
+
+      # Database
+
+      # The database vendor.
+      #db=postgres
+
+      # The username of the database user.
+      #db-username=keycloak
+
+      # The password of the database user.
+      #db-password=password
+
+      # The full database JDBC URL. If not provided, a default URL is set based on the selected database vendor.
+      #db-url=jdbc:postgresql://localhost/keycloak
+
+      # Observability
+
+      # If the server should expose healthcheck endpoints.
+      #health-enabled=true
+
+      # If the server should expose metrics endpoints.
+      #metrics-enabled=true
+
+      # HTTP
+
+      # The file path to a server certificate or certificate chain in PEM format.
+      #https-certificate-file=${kc.home.dir}conf/server.crt.pem
+
+      # The file path to a private key in PEM format.
+      #https-certificate-key-file=${kc.home.dir}conf/server.key.pem
+
+      # The proxy address forwarding mode if the server is behind a reverse proxy.
+      #proxy=reencrypt
+
+      # Do not attach route to cookies and rely on the session affinity capabilities from reverse proxy
+      #spi-sticky-session-encoder-infinispan-should-attach-route=false
+
+      # Hostname for the Keycloak server.
+      #hostname=myhostname
+
 
 ## @section Keycloak parameters
 tolerations:
@@ -72,6 +231,8 @@ extraEnvVars:
 # to fix logout for klantportaal:
 - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
   value: 'true'
+- name: KEYCLOAK_MOUNTED_CONF_DIR
+  value: 
 
 ## @param replicaCount Number of Keycloak replicas to deploy
 ##

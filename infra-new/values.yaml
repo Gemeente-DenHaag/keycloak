@@ -236,6 +236,10 @@ extraStartupArgs: "--optimized"
 ##      echo "Do something."
 ##
 initdbScripts: {}
+# initdbScripts:
+#   cp_default_conf.sh: |
+#      #!/bin/bash
+#      cp -r /opt/bitnami/keycloak/defaultconf/. /opt/bitnami/keycloak/conf
 ## @param initdbScriptsConfigMap ConfigMap with the initdb scripts (Note: Overrides `initdbScripts`)
 ##
 initdbScriptsConfigMap: ""
@@ -290,7 +294,7 @@ containerSecurityContext:
   runAsUser: 1001
   runAsNonRoot: true
   privileged: false
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
     drop: ["ALL"]
@@ -465,6 +469,14 @@ updateStrategy:
 extraVolumes:
 - name: tmpfs-1
   emptyDir: {}
+- name: keycloak-conf-vol
+  configMap:
+    name: keycloak-keycloak-conf
+    optional: false
+- name: keycloak-cache-vol
+  configMap:
+    name: keycloak-cache-ispn-xml
+    optional: false
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
 ##
 extraVolumeMounts:
@@ -472,8 +484,14 @@ extraVolumeMounts:
   name: tmpfs-1
 - mountPath: /opt/bitnami/keycloak/data/tmp
   name: tmpfs-1
-# - mountPath: /opt/bitnami/keycloak/conf
+- mountPath: /opt/bitnami/keycloak/conf
+  name: tmpfs-1
+# - mountPath: /opt/bitnami/keycloak/conf/keycloak.conf
 #   name: tmpfs-1
+#   subPath: keycloak.conf
+# - mountPath: /opt/bitnami/keycloak/conf/cache-ispn.xml
+#   name: tmpfs-1
+#   subPath: cache-ispn.xml
 # - mountPath: /opt/bitnami/keycloak/lib/quarkus
 #   name: tmpfs-1
 ## @param initContainers Add additional init containers to the Keycloak pods
@@ -486,7 +504,22 @@ extraVolumeMounts:
 ##       - name: portname
 ##         containerPort: 1234
 ##
-initContainers: []
+# initContainers: []
+initContainers:
+- name: set-kc-conf-files
+  image: busybox:1.28
+  # command: ['sh', '-c', 'touch /opt/bitnami/keycloak/conf/keycloak.conf; chown 1001:1000 -R /opt/bitnami/keycloak/*; ls -al /opt/bitnami/keycloak/conf/;']
+  # command: ['sh', '-c', 'ls -al /tmp; ls -al /opt/bitnami/keycloak/conf; cp /tmp/keycloak.conf /opt/bitnami/keycloak/conf/keycloak.conf; cp /tmp/cache-ispn.xml /opt/bitnami/keycloak/conf/cache-ispn.xml; chown 1001:1000 -R /opt/bitnami/keycloak/*; ls -al /opt/bitnami/keycloak/conf/;']
+  command: ['sh', '-c', 'cp -r /tmp/. /opt/bitnami/keycloak/conf; chown 1001:1000 -R /opt/bitnami/keycloak/*; ls -al /opt/bitnami/keycloak/conf/;']
+  volumeMounts:
+  - mountPath: /opt/bitnami/keycloak/conf
+    name: tmpfs-1
+  - mountPath: /tmp/keycloak.conf
+    name: keycloak-conf-vol
+    subPath: keycloak.conf
+  - mountPath: /tmp/cache-ispn.xml
+    name: keycloak-cache-vol
+    subPath: cache-ispn.xml
 ## @param sidecars Add additional sidecar containers to the Keycloak pods
 ## Example:
 ## sidecars:
