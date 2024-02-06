@@ -65,7 +65,7 @@ extraEnvVars:
 - name: KC_HOSTNAME
   value: '{{ .Values.ingress.hostname }}'
 - name: KC_LOG_LEVEL
-  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG
+  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG,org.infinispan:WARN
 - name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
   value: 'true'
 # to fix logout for klantportaal:
