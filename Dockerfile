@@ -20,7 +20,7 @@ RUN bin/kc.sh build
 
 FROM bitnami/keycloak:22.0.5
 
-ADD copyfromdefaultconftoconf.sh /docker-entrypoint-initdb.d
+# ADD copyfromdefaultconftoconf.sh /docker-entrypoint-initdb.d
 COPY --chown=keycloak:keycloak --from=builder /opt/bitnami/keycloak/ /opt/bitnami/keycloak/
 
 WORKDIR /opt/bitnami/keycloak
