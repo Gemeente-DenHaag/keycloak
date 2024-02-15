@@ -1,0 +1,179 @@
+## Extra labels to add to Pod
+##
+podLabels:
+  public-access: allow
+
+tolerations:
+- key: "zgwo01"
+  operator: "Equal"
+  value: "true"
+  effect: "NoSchedule"
+
+## Configure the ingress resource that allows you to access the
+## app installation. Set up the URL
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## When the ingress is enabled, a host pointing to this will be created
+  ##
+  hostname: keycloak-zgw.dev.denhaag.nl
+
+  ## Specify a tls secret which already exists. tls must be set to true
+  ##
+  existingTlsSecret: sterdevdenhaagnl-tls
+
+  ingressClassName:
+
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway-int
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    appgw.ingress.kubernetes.io/health-probe-path: "/health"
+    appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+    # appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+
+##  We usually recommend not to specify default resources and to leave this as a conscious
+##  choice for the user. This also increases chances charts run on environments with little
+##  resources, such as Minikube. If you do want to specify resources, uncomment the following
+##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+##
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 500Mi
+
+##
+## Autoscaling configuration
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  # targetCPU: 50
+  # targetMemory: 50
+
+##
+## An array to add env vars
+##
+env:
+  - name: KC_HOSTNAME
+    value: '{{ .Values.ingress.hostname }}'
+  - name: KC_LOG_LEVEL
+    value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+    # value: INFO,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
+    # value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO,io.quarkus.vertx.http:INFO,org.postgresql.jdbc:INFO
+  # - name: KEYCLOAK_LOG_LEVEL
+  #   value: INFO
+  # - name: KEYCLOAK_ADMIN
+  #   value: zgwadmin
+  # - name: KC_PROXY
+  #   value: edge
+  # - name: KC_HTTP_PORT
+  #   value: "8080"
+  # - name: KC_HTTP_ENABLED
+  #   value: "true"
+  # - name: KC_HOSTNAME_STRICT
+  #   value: "false"
+  # - name: KC_HOSTNAME_STRICT_HTTPS
+  #   value: "false"
+  # - name: KC_HOSTNAME_PATH
+  #   value: /auth
+  # - name: KEYCLOAK_ADMIN_PASSWORD
+  #   value:
+  # - name: KC_DB_USERNAME
+  #   value: keycloak2-test
+  # - name: KC_DB_URL_DATABASE
+  #   value: 
+  # - name: KC_DB_URL_HOST
+  #   value: 
+  # - name: KC_DB_URL_PROPERTIES
+  #   value:
+  # - name: KC_DB_PASSWORD
+  #   value:
+  # - name: JAVA_OPTS_APPEND
+  #   value:
+  # - name: KC_DB
+  #   value: postgres
+
+##
+## Sync objects from Azure keyvault to kubernetes as secrets
+##
+vaultname: kv-zgw-ota-weu-01
+syncAKV:
+  sync-1:
+    vaultname: '{{ .Values.vaultname}}'
+    objectname: '{{ include "app.fullname" . }}-dev-keycloak-admin'
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN
+  sync-2:
+    vaultname: '{{ .Values.vaultname}}'
+    objectname: '{{ include "app.fullname" . }}-dev-keycloak-admin-password'
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KEYCLOAK_ADMIN_PASSWORD
+  sync-3:
+    vaultname: '{{ .Values.vaultname}}'
+    objectname: '{{ include "app.fullname" . }}-dev-kc-db-url'
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_URL
+  sync-4:
+    vaultname: '{{ .Values.vaultname}}'
+    objectname: '{{ include "app.fullname" . }}-dev-kc-db-username'
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_USERNAME
+  sync-5:
+    vaultname: '{{ .Values.vaultname}}'
+    objectname: '{{ include "app.fullname" . }}-dev-kc-db-password'
+    objecttype: secret
+    output:
+      secret:
+        name: '{{ include "app.fullname" . }}'
+        dataKey: KC_DB_PASSWORD
+
+extraObjects:
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ext'
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway-ext
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+      # appgw.ingress.kubernetes.io/use-private-ip: "true" not needed
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
+    labels:
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+  spec:
+    rules:
+    - host: '{{ .Values.ingress.hostname }}'
+      http:
+        paths:
+        - backend:
+            service:
+              name: '{{ include "common.names.fullname" . }}'
+              port:
+                name: app
+          path: /
+          pathType: Prefix
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: '{{ .Values.ingress.existingTlsSecret }}'
