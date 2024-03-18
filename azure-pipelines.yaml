@@ -318,3 +318,20 @@ stages:
               install: true
               waitForExecution: true
               arguments: '-f infra-new/values.yaml -f infra-new/values-prod.yaml --version 17.3.6'
+  
+  - job: CreateAndMergePR
+    dependsOn: Deploy_to_Prod
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - checkout: none
+      - task: CreatePullRequest@1
+        inputs:
+          repoType: 'GitHub'
+          githubEndpoint: 'landingzone zaakgericht werken'
+          githubRepository: '$(Build.Repository.Name)'
+          sourceBranch: '$(Build.SourceBranch)'
+          targetBranch: 'main'
+          title: 'Automatic Azure DevOps pr $(Build.SourceBranch) to main'
+          reviewers: 'test-automation-engineer'
+          githubAutoMerge: true
