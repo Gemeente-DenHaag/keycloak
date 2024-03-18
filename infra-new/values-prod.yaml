@@ -90,8 +90,8 @@ extraEnvVars:
 - name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
   value: 'true'
 # to fix logout for klantportaal:
-- name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
-  value: 'true'
+# - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
+#   value: 'true'
 
 ## @param replicaCount Number of Keycloak replicas to deploy
 ##
