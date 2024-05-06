@@ -41,7 +41,7 @@
             <#if normalProviders?size != 0>
                 <h2 class="utrecht-heading-2">${msg("loginTitle")}</h2>
                 <#if authorisedProviders?size != 0>
-                    <p class="utrecht-paragraph">${msg("loginSubTitle")} <a href="#gemachtigde-heading" class="denhaag-link"><span class="denhaag-link__label">${msg("loginSubTitleLinkText")}</span></a>${msg("loginSubTitlePostLink")}</p>
+                    <p class="utrecht-paragraph">${msg("loginSubTitle")} <a href="https://www.denhaag.nl/nl/contact-met-de-gemeente/uw-persoonlijke-zaken-regelen-via-mijndenhaag/" class="denhaag-link"><span class="denhaag-link__label">${msg("loginSubTitleLinkText")}</span></a>${msg("loginSubTitlePostLink")}</p>
                 </#if>
                 <@render.cardGroup providers=normalProviders providersData=staticProviderData />
             </#if>
