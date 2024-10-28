@@ -71,6 +71,13 @@ extraDeploy:
                 name: '{{ include "common.names.fullname" . }}'
                 port:
                   name: http
+          - path: /admin/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
 
 ## @section Keycloak parameters
 
