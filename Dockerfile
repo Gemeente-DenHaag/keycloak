@@ -9,6 +9,7 @@ ENV KC_DB=postgres
 # needed because of readonlyrootfilesystem
 ADD --chown=keycloak:keycloak ./conf defaultconf/
 
+# trigger
 ADD --chown=keycloak:keycloak ./providers providers/
 ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
