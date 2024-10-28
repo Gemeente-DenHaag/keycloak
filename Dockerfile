@@ -9,7 +9,7 @@ ENV KC_DB=postgres
 # needed because of readonlyrootfilesystem
 ADD --chown=keycloak:keycloak ./conf defaultconf/
 
-ADD --chown=keycloak:keycloak ./IdentityProviderAttributeSessionNoteMapper-1.0-SNAPSHOT.jar providers/
+ADD --chown=keycloak:keycloak ./providers providers/
 ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
 RUN bin/kc.sh build
