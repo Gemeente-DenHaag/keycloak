@@ -1,4 +1,4 @@
-FROM bitnami/keycloak:22.0.5 as builder
+FROM bitnami/keycloak:26.0.5 as builder
 WORKDIR /opt/bitnami/keycloak
 
 ENV KC_HEALTH_ENABLED=true
@@ -15,7 +15,7 @@ ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
 RUN bin/kc.sh build
 
-FROM bitnami/keycloak:22.0.5
+FROM bitnami/keycloak:26.0.5
 WORKDIR /opt/bitnami/keycloak
 
 COPY --chown=keycloak:keycloak --from=builder /opt/bitnami/keycloak/ /opt/bitnami/keycloak/

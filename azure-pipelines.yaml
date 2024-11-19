@@ -144,7 +144,7 @@ stages:
 - stage: DeployToDev
   dependsOn: Build
   displayName: Deploy image to Dev
-  condition: and(succeeded(), contains(variables['build.sourceBranch'], '/feature/'))
+  condition: and(succeeded(), contains(variables['build.sourceBranch'], '/featuree/'))
   variables:
     kubernetesServiceConnection: aks-saks-o-weu-01-zgw-o
     namespace: zgw-o
