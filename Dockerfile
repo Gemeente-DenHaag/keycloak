@@ -5,6 +5,7 @@ ENV KC_HEALTH_ENABLED=true
 ENV KC_METRICS_ENABLED=true
 ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
+ENV KC_HTTP_RELATIVE_PATH=/
 
 # needed because of readonlyrootfilesystem
 # Temp disable for infinspan changes
