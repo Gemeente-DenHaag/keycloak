@@ -144,7 +144,7 @@ stages:
 - stage: DeployToDev
   dependsOn: Build
   displayName: Deploy image to Dev
-  condition: and(succeeded(), contains(variables['build.sourceBranch'], '/featuree/'))
+  condition: and(succeeded(), contains(variables['build.sourceBranch'], '/feature/'))
   variables:
     kubernetesServiceConnection: aks-saks-o-weu-01-zgw-o
     namespace: zgw-o
@@ -183,7 +183,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra-new/values.yaml -f infra-new/values-dev.yaml --version 17.3.6'
+              arguments: '-f infra26/values.yaml -f infra26/values-dev.yaml --version 24.2.1'
 
 - stage: DeployToTest
   dependsOn: Build
