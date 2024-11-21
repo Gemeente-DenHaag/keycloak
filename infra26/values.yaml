@@ -536,20 +536,22 @@ updateStrategy:
 minReadySeconds: 0
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pods
 ##
-extraVolumes:
-- name: tmpfs-1
-  emptyDir: {}
-## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
-##
-extraVolumeMounts:
-- mountPath: /tmp
-  name: tmpfs-1
-- mountPath: /opt/bitnami/keycloak/data/tmp
-  name: tmpfs-1
-- mountPath: /opt/bitnami/keycloak/conf
-  name: tmpfs-1
-- mountPath: /bitnami/keycloak/.user_scripts_initialized
-  name: tmpfs-1
+# DISABLED
+# extraVolumes:
+# - name: tmpfs-1
+#   emptyDir: {}
+# ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
+# ##
+# DISABLED
+# extraVolumeMounts:
+# - mountPath: /tmp
+#   name: tmpfs-1
+# - mountPath: /opt/bitnami/keycloak/data/tmp
+#   name: tmpfs-1
+# - mountPath: /opt/bitnami/keycloak/conf
+#   name: tmpfs-1
+# - mountPath: /bitnami/keycloak/.user_scripts_initialized
+#   name: tmpfs-1
 ## @param initContainers Add additional init containers to the Keycloak pods
 ## Example:
 ## initContainers:
