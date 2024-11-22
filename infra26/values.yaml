@@ -99,7 +99,7 @@ diagnosticMode:
 ## @param image.pullPolicy Keycloak image pull policy
 ## @param image.pullSecrets Specify docker-registry secret names as an array
 ## @param image.debug Specify if debug logs should be enabled
-##
+## helm upgrade --namespace zgw-o --install -f infra26/values.yaml -f infra26/values-dev.yaml --version 24.2.1 keycloak bitnami/keycloak
 image:
   registry: crzgwpweu01.azurecr.io
   repository: bitnami/keycloak
@@ -218,7 +218,7 @@ adminRealm: "master"
 production: true
 ## @param proxyHeaders Set Keycloak proxy headers
 ##
-proxyHeaders: ""
+proxyHeaders: "xforwarded"
 ## @param proxy reverse Proxy mode edge, reencrypt, passthrough or none
 ## ref: https://www.keycloak.org/server/reverseproxy
 ##
@@ -251,7 +251,6 @@ extraStartupArgs: "--optimized"
 ## @param enableDefaultInitContainers Deploy default init containers
 ## Disable this parameter could be helpful for 3rd party images e.g native Keycloak image.
 ##
-# DONT KNOW YET
 enableDefaultInitContainers: true
 ## @param initdbScripts Dictionary of initdb scripts
 ## Specify dictionary of scripts to be run at first boot
@@ -304,7 +303,7 @@ revisionHistoryLimitCount: 10
 containerPorts:
   http: 8080
   https: 8443
-  metrics: 9000 # DONT KNOW YET
+  metrics: 9000
 ## @param extraContainerPorts Optionally specify extra list of additional port-mappings for Keycloak container
 ##
 extraContainerPorts: []
@@ -357,7 +356,6 @@ containerSecurityContext:
 ## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production).
 ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
 ##
-# DONT KNOW YET
 resourcesPreset: ""
 ## @param resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
 ## Example:
@@ -426,7 +424,7 @@ startupProbe:
 customLivenessProbe:
   httpGet:
     path: /health/live
-    port: http
+    port: metrics
     scheme: HTTP
   initialDelaySeconds: 60
   periodSeconds: 1
@@ -438,7 +436,7 @@ customLivenessProbe:
 customReadinessProbe:
   httpGet:
     path: /health/ready
-    port: http
+    port: metrics
     scheme: HTTP
   initialDelaySeconds: 30
   periodSeconds: 10
@@ -453,7 +451,7 @@ customStartupProbe: {}
 lifecycleHooks: {}
 ## @param automountServiceAccountToken Mount Service Account token in pod
 ## DONT KNOW YET, NEEDED?
-automountServiceAccountToken: true
+automountServiceAccountToken: false
 ## @param hostAliases Deployment pod host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
 ##
