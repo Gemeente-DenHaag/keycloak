@@ -1,179 +1,232 @@
-## Extra labels to add to Pod
+## @param extraDeploy Array of extra objects to deploy with the release
 ##
-podLabels:
-  public-access: allow
+extraDeploy:
+- apiVersion: spv.no/v2beta1
+  kind: AzureKeyVaultSecret
+  metadata:
+    name: keycloak-akv2k8s
+  spec:
+    vault:
+      name: kv-zgw-ota-weu-01
+      object:
+        contentType: 'application/x-yaml'
+        name: keycloak-dev
+        type: multi-key-value-secret
+    output:
+      secret:
+        name: keycloak
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ext'
+    namespace: '{{ include "common.names.namespace" . }}'
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway-ext
+      appgw.ingress.kubernetes.io/ssl-redirect: 'true'
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
+  spec:
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: sterdevdenhaagnl-tls
+    rules:
+      - host: '{{ .Values.ingress.hostname }}'
+        http:
+          paths:
+          - path: /js/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
+          - path: /realms/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
+          - path: /resources/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
+          - path: /robots.txt
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
+          - path: /admin/
+            pathType: Prefix
+            backend:
+              service:
+                name: '{{ include "common.names.fullname" . }}'
+                port:
+                  name: http
 
+## @section Keycloak parameters
 tolerations:
 - key: "zgwo01"
   operator: "Equal"
   value: "true"
   effect: "NoSchedule"
+## @param extraEnvVars Extra environment variables to be set on Keycloak container
+## Example:
+## extraEnvVars:
+##   - name: FOO
+##     value: "bar"
+##
+extraEnvVars:
+- name: KC_FEATURES
+  value: token-exchange,admin-fine-grained-authz
+- name: KC_HOSTNAME
+  value: '{{ .Values.ingress.hostname }}'
+- name: KC_LOG_LEVEL
+  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG,org.infinispan:WARN
+- name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
+  value: 'true'
+# to fix logout for klantportaal:
+# - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
+#   value: 'true'
 
-## Configure the ingress resource that allows you to access the
-## app installation. Set up the URL
-## ref: http://kubernetes.io/docs/user-guide/ingress/
+## @param replicaCount Number of Keycloak replicas to deploy
+##
+replicaCount: 1
+
+## Keycloak ingress parameters
+## ref: https://kubernetes.io/docs/user-guide/ingress/
 ##
 ingress:
-  ## When the ingress is enabled, a host pointing to this will be created
+  ## @param ingress.hostname Default host for the ingress record (evaluated as template)
   ##
   hostname: keycloak-zgw.dev.denhaag.nl
-
-  ## Specify a tls secret which already exists. tls must be set to true
+  ## @param ingress.annotations [object] Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+  ## Use this parameter to set the required annotations for cert-manager, see
+  ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+  ## e.g:
+  ## annotations:
+  ##   kubernetes.io/ingress.class: nginx
+  ##   cert-manager.io/cluster-issuer: cluster-issuer-name
   ##
-  existingTlsSecret: sterdevdenhaagnl-tls
-
-  ingressClassName:
-
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway-int
     appgw.ingress.kubernetes.io/ssl-redirect: "true"
-    appgw.ingress.kubernetes.io/health-probe-path: "/health"
     appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
-    # appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+  ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
+  ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  ## extraTls:
+  ## - hosts:
+  ##     - keycloak.local
+  ##   secretName: keycloak.local-tls
+  ##
+  extraTls:
+  - hosts:
+    - keycloak-zgw.dev.denhaag.nl
+    secretName: sterdevdenhaagnl-tls
 
-##  We usually recommend not to specify default resources and to leave this as a conscious
-##  choice for the user. This also increases chances charts run on environments with little
-##  resources, such as Minikube. If you do want to specify resources, uncomment the following
-##  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @section Other parameters
 ##
-resources:
-  limits:
-    cpu: 1
-    memory: 1Gi
-  requests:
-    cpu: 500m
-    memory: 500Mi
 
+## Keycloak Pod Disruption Budget configuration
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
 ##
-## Autoscaling configuration
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  ##
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  ##
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ##
+  maxUnavailable: ""
+## Keycloak Autoscaling configuration
+## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+## @param autoscaling.enabled Enable autoscaling for Keycloak
+## @param autoscaling.minReplicas Minimum number of Keycloak replicas
+## @param autoscaling.maxReplicas Maximum number of Keycloak replicas
+## @param autoscaling.targetCPU Target CPU utilization percentage
+## @param autoscaling.targetMemory Target Memory utilization percentage
 ##
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 10
-  # targetCPU: 50
-  # targetMemory: 50
+  maxReplicas: 11
+  targetCPU: ""
+  targetMemory: ""
+  ## HPA Scaling Behavior
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior
+  ##
+  behavior:
+    ## HPA behavior when scaling up
+    ## @param autoscaling.behavior.scaleUp.stabilizationWindowSeconds The number of seconds for which past recommendations should be considered while scaling up
+    ## @param autoscaling.behavior.scaleUp.selectPolicy The priority of policies that the autoscaler will apply when scaling up
+    ## @param autoscaling.behavior.scaleUp.policies [array] HPA scaling policies when scaling up
+    ## e.g:
+    ## Policy to scale 20% of the pod in 60s
+    ## - type: Percent
+    ##   value: 20
+    ##   periodSeconds: 60
+    ##
+    scaleUp:
+      stabilizationWindowSeconds: 120
+      selectPolicy: Max
+      policies: []
+    ## HPA behavior when scaling down
+    ## @param autoscaling.behavior.scaleDown.stabilizationWindowSeconds The number of seconds for which past recommendations should be considered while scaling down
+    ## @param autoscaling.behavior.scaleDown.selectPolicy The priority of policies that the autoscaler will apply when scaling down
+    ## @param autoscaling.behavior.scaleDown.policies [array] HPA scaling policies when scaling down
+    ## e.g:
+    ## Policy to scale one pod in 300s
+    ## - type: Pods
+    ##   value: 1
+    ##   periodSeconds: 300
+    ##
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      selectPolicy: Max
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 300
 
+## External PostgreSQL configuration
+## All of these values are only used when postgresql.enabled is set to false
+## @param externalDatabase.host Database host
+## @param externalDatabase.port Database port number
+## @param externalDatabase.user Non-root username for Keycloak
+## @param externalDatabase.password Password for the non-root username for Keycloak
+## @param externalDatabase.database Keycloak database name
+## @param externalDatabase.existingSecret Name of an existing secret resource containing the database credentials
+## @param externalDatabase.existingSecretHostKey Name of an existing secret key containing the database host name
+## @param externalDatabase.existingSecretPortKey Name of an existing secret key containing the database port
+## @param externalDatabase.existingSecretUserKey Name of an existing secret key containing the database user
+## @param externalDatabase.existingSecretDatabaseKey Name of an existing secret key containing the database name
+## @param externalDatabase.existingSecretPasswordKey Name of an existing secret key containing the database credentials
+## @param externalDatabase.annotations Additional custom annotations for external database secret object
 ##
-## An array to add env vars
-##
-env:
-  - name: KC_HOSTNAME
-    value: '{{ .Values.ingress.hostname }}'
-  - name: KC_LOG_LEVEL
-    value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
-    # value: INFO,org.keycloak.services:DEBUG,org.keycloak.services.scheduled:INFO,org.keycloak.authentication:DEBUG,org.apache.http:DEBUG,org.keycloak.broker:DEBUG
-    # value: DEBUG,org.hibernate:INFO,freemarker.cache:INFO,org.keycloak.transaction:INFO,io.smallrye.context.jta.context.propagation:INFO,org.keycloak.services.scheduled:INFO,io.quarkus.vertx.http:INFO,org.postgresql.jdbc:INFO
-  # - name: KEYCLOAK_LOG_LEVEL
-  #   value: INFO
-  # - name: KEYCLOAK_ADMIN
-  #   value: zgwadmin
-  # - name: KC_PROXY
-  #   value: edge
-  # - name: KC_HTTP_PORT
-  #   value: "8080"
-  # - name: KC_HTTP_ENABLED
-  #   value: "true"
-  # - name: KC_HOSTNAME_STRICT
-  #   value: "false"
-  # - name: KC_HOSTNAME_STRICT_HTTPS
-  #   value: "false"
-  # - name: KC_HOSTNAME_PATH
-  #   value: /auth
-  # - name: KEYCLOAK_ADMIN_PASSWORD
-  #   value:
-  # - name: KC_DB_USERNAME
-  #   value: keycloak2-test
-  # - name: KC_DB_URL_DATABASE
-  #   value: 
-  # - name: KC_DB_URL_HOST
-  #   value: 
-  # - name: KC_DB_URL_PROPERTIES
-  #   value:
-  # - name: KC_DB_PASSWORD
-  #   value:
-  # - name: JAVA_OPTS_APPEND
-  #   value:
-  # - name: KC_DB
-  #   value: postgres
-
-##
-## Sync objects from Azure keyvault to kubernetes as secrets
-##
-vaultname: kv-zgw-ota-weu-01
-syncAKV:
-  sync-1:
-    vaultname: '{{ .Values.vaultname}}'
-    objectname: '{{ include "app.fullname" . }}-dev-keycloak-admin'
-    objecttype: secret
-    output:
-      secret:
-        name: '{{ include "app.fullname" . }}'
-        dataKey: KEYCLOAK_ADMIN
-  sync-2:
-    vaultname: '{{ .Values.vaultname}}'
-    objectname: '{{ include "app.fullname" . }}-dev-keycloak-admin-password'
-    objecttype: secret
-    output:
-      secret:
-        name: '{{ include "app.fullname" . }}'
-        dataKey: KEYCLOAK_ADMIN_PASSWORD
-  sync-3:
-    vaultname: '{{ .Values.vaultname}}'
-    objectname: '{{ include "app.fullname" . }}-dev-kc-db-url'
-    objecttype: secret
-    output:
-      secret:
-        name: '{{ include "app.fullname" . }}'
-        dataKey: KC_DB_URL
-  sync-4:
-    vaultname: '{{ .Values.vaultname}}'
-    objectname: '{{ include "app.fullname" . }}-dev-kc-db-username'
-    objecttype: secret
-    output:
-      secret:
-        name: '{{ include "app.fullname" . }}'
-        dataKey: KC_DB_USERNAME
-  sync-5:
-    vaultname: '{{ .Values.vaultname}}'
-    objectname: '{{ include "app.fullname" . }}-dev-kc-db-password'
-    objecttype: secret
-    output:
-      secret:
-        name: '{{ include "app.fullname" . }}'
-        dataKey: KC_DB_PASSWORD
-
-extraObjects:
-- apiVersion: networking.k8s.io/v1
-  kind: Ingress
-  metadata:
-    name: '{{ include "common.names.fullname" . }}-ext'
-    namespace: '{{ .Release.Namespace }}'
-    annotations:
-      kubernetes.io/ingress.class: azure/application-gateway-ext
-      appgw.ingress.kubernetes.io/ssl-redirect: "true"
-      appgw.ingress.kubernetes.io/health-probe-path: "/health"
-      appgw.ingress.kubernetes.io/waf-policy-for-path: "/subscriptions/e034307d-76cf-46fe-99ce-d1fe427c0b0e/resourceGroups/rg-saks-o-weu-02/providers/Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/wafpol-zgw-saks-o-weu-01"
-      # appgw.ingress.kubernetes.io/use-private-ip: "true" not needed
-      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
-      meta.helm.sh/release-namespace: '{{ .Release.Namespace }}'
-    labels:
-      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
-      app.kubernetes.io/managed-by: '{{ .Release.Service }}'
-      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
-  spec:
-    rules:
-    - host: '{{ .Values.ingress.hostname }}'
-      http:
-        paths:
-        - backend:
-            service:
-              name: '{{ include "common.names.fullname" . }}'
-              port:
-                name: app
-          path: /
-          pathType: Prefix
-    tls:
-    - hosts:
-      - '{{ .Values.ingress.hostname }}'
-      secretName: '{{ .Values.ingress.existingTlsSecret }}'
+externalDatabase:
+  host: ""
+  port: 
+  user: 
+  database: 
+  password: ""
+  existingSecret: "keycloak"
+  existingSecretHostKey: "KEYCLOAK_DATABASE_HOST"
+  existingSecretPortKey: "KEYCLOAK_DATABASE_PORT"
+  existingSecretUserKey: "KEYCLOAK_DATABASE_USER"
+  existingSecretDatabaseKey: "KEYCLOAK_DATABASE_NAME"
+  existingSecretPasswordKey: "KEYCLOAK_DATABASE_PASSWORD"
+  annotations: {}

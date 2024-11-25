@@ -183,7 +183,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra26/values.yaml -f infra26/values-dev.yaml --version 24.2.1'
+              arguments: '-f infra/values.yaml -f infra/values-dev.yaml --version 24.2.1'
 
 - stage: DeployToTest
   dependsOn: Build
@@ -227,7 +227,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra26/values.yaml -f infra26/values-test.yaml --version 24.2.1'
+              arguments: '-f infra/values.yaml -f infra/values-test.yaml --version 24.2.1'
 
 - stage: DeployToAcc
   dependsOn: Build
@@ -271,7 +271,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra26/values.yaml -f infra26/values-acc.yaml --version 24.2.1'
+              arguments: '-f infra/values.yaml -f infra/values-acc.yaml --version 24.2.1'
 
 - stage: DeployToProd
   dependsOn:
@@ -317,7 +317,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra26/values.yaml -f infra26/values-prod.yaml --version 24.2.1'
+              arguments: '-f infra/values.yaml -f infra/values-prod.yaml --version 24.2.1'
           
           - bash: |
               curl \
