@@ -7,10 +7,6 @@ ENV KC_FEATURES=token-exchange,admin-fine-grained-authz
 ENV KC_DB=postgres
 ENV KC_HTTP_RELATIVE_PATH=/
 
-# needed because of readonlyrootfilesystem
-# Temp disable for infinspan changes
-# ADD --chown=keycloak:keycloak ./conf defaultconf/
-
 ADD --chown=keycloak:keycloak ./providers providers/
 ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
