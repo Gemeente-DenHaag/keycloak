@@ -183,7 +183,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra-new/values.yaml -f infra-new/values-dev.yaml --version 17.3.6'
+              arguments: '-f infra/values.yaml -f infra/values-dev.yaml --version 24.2.1'
 
 - stage: DeployToTest
   dependsOn: Build
@@ -227,7 +227,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra-new/values.yaml -f infra-new/values-test.yaml --version 17.3.6'
+              arguments: '-f infra/values.yaml -f infra/values-test.yaml --version 24.2.1'
 
 - stage: DeployToAcc
   dependsOn: Build
@@ -271,7 +271,7 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra-new/values.yaml -f infra-new/values-acc.yaml --version 17.3.6'
+              arguments: '-f infra/values.yaml -f infra/values-acc.yaml --version 24.2.1'
 
 - stage: DeployToProd
   dependsOn:
@@ -317,4 +317,40 @@ stages:
               overrideValues: 'image.tag=$(tag)'
               install: true
               waitForExecution: true
-              arguments: '-f infra-new/values.yaml -f infra-new/values-prod.yaml --version 17.3.6'
+              arguments: '-f infra/values.yaml -f infra/values-prod.yaml --version 24.2.1'
+          
+          - bash: |
+              curl \
+                -X POST \
+                -H 'Authorization: Bearer $(System.AccessToken)' \
+                -H 'Content-Type: application/json' \
+                -d '[
+                      {
+                        "daysValid": 180,
+                        "definitionId": $(System.DefinitionId),
+                        "ownerId": "User:$(Build.RequestedForId)",
+                        "protectPipeline": false,
+                        "runId": $(Build.BuildId)
+                      }
+                    ]' \
+                "$(System.CollectionUri)$(echo ${SYSTEM_TEAMPROJECT} | sed 's/ /%20/g')/_apis/build/retention/leases?api-version=6.0-preview.1"
+            condition: and(succeeded(), not(canceled()))
+            name: RetainRelease
+            displayName: Retain release
+  
+  - job: CreateAndMergePR
+    dependsOn: Deploy_to_Prod
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - checkout: none
+      - task: CreatePullRequest@1
+        inputs:
+          repoType: 'GitHub'
+          githubEndpoint: 'landingzone zaakgericht werken'
+          githubRepository: '$(Build.Repository.Name)'
+          sourceBranch: '$(Build.SourceBranch)'
+          targetBranch: 'main'
+          title: 'Automatic Azure DevOps pr $(Build.SourceBranch) to main'
+          reviewers: 'test-automation-engineer'
+          githubAutoMerge: true
