@@ -1,0 +1,172 @@
+podLabels:
+  public-access: allow
+
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy:
+- apiVersion: spv.no/v2beta1
+  kind: AzureKeyVaultSecret
+  metadata:
+    name: keycloak-akv2k8s
+  spec:
+    vault:
+      name: kv-zgw-ota-weu-01
+      object:
+        contentType: 'application/x-yaml'
+        name: keycloak-test
+        type: multi-key-value-secret
+    output:
+      secret:
+        name: keycloak
+- apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: '{{ include "common.names.fullname" . }}-ag'
+    namespace: '{{ include "common.names.namespace" . }}'
+    labels:
+      app.kubernetes.io/component: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/instance: '{{ include "common.names.fullname" . }}'
+      app.kubernetes.io/name: '{{ include "common.names.fullname" . }}'
+    annotations:
+      appgw.ingress.kubernetes.io/ssl-redirect: 'true'
+      appgw.ingress.kubernetes.io/rewrite-rule-set: zgw-rewriteset1
+      appgw.ingress.kubernetes.io/health-probe-path: "/health"
+      meta.helm.sh/release-name: '{{ include "common.names.fullname" . }}'
+      meta.helm.sh/release-namespace: '{{ include "common.names.namespace" . }}'
+  spec:
+    ingressClassName: azure-application-gateway
+    tls:
+    - hosts:
+      - '{{ .Values.ingress.hostname }}'
+      secretName: zgw-tls-secret
+    rules:
+      - host: '{{ .Values.ingress.hostname }}'
+        http:
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: '{{ include "common.names.fullname" . }}'
+                  port:
+                    name: http
+
+## @section Keycloak parameters
+
+## @param extraEnvVars Extra environment variables to be set on Keycloak container
+## Example:
+## extraEnvVars:
+##   - name: FOO
+##     value: "bar"
+##
+extraEnvVars:
+- name: KC_FEATURES
+  value: token-exchange,admin-fine-grained-authz
+- name: KC_HOSTNAME
+  value: '{{ .Values.ingress.hostname }}'
+- name: KC_LOG_LEVEL
+  value: INFO,org.keycloak.services:INFO,org.keycloak.authentication:INFO,org.apache.http.wire:DEBUG,org.keycloak.broker:DEBUG,org.infinispan:WARN
+- name: KEYCLOAK_ENABLE_HEALTH_ENDPOINTS
+  value: 'true'
+# to fix logout for klantportaal:
+# - name: KC_SPI_LOGIN_PROTOCOL_OPENID_CONNECT_LEGACY_LOGOUT_REDIRECT_URI
+#   value: 'true'
+
+## @param replicaCount Number of Keycloak replicas to deploy
+##
+replicaCount: 1
+
+## Keycloak ingress parameters
+## ref: https://kubernetes.io/docs/user-guide/ingress/
+##
+ingress:
+  ## @param ingress.hostname Default host for the ingress record (evaluated as template)
+  ##
+  hostname: keycloak-zgw.test.denhaag.nl
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ##
+  ingressClassName: nginx
+  ## @param ingress.annotations [object] Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+  ## Use this parameter to set the required annotations for cert-manager, see
+  ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+  ## e.g:
+  ## annotations:
+  ##   kubernetes.io/ingress.class: nginx
+  ##   cert-manager.io/cluster-issuer: cluster-issuer-name
+  ##
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
+  ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  ## extraTls:
+  ## - hosts:
+  ##     - keycloak.local
+  ##   secretName: keycloak.local-tls
+  ##
+  extraTls:
+  - hosts:
+    - keycloak-zgw.test.denhaag.nl
+    secretName: zgw-tls-secret
+
+## @section Other parameters
+##
+
+## Keycloak Pod Disruption Budget configuration
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+##
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  ##
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  ##
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ##
+  maxUnavailable: ""
+## Keycloak Autoscaling configuration
+## @param autoscaling.enabled Enable autoscaling for Keycloak
+## @param autoscaling.minReplicas Minimum number of Keycloak replicas
+## @param autoscaling.maxReplicas Maximum number of Keycloak replicas
+## @param autoscaling.targetCPU Target CPU utilization percentage
+## @param autoscaling.targetMemory Target Memory utilization percentage
+##
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 11
+  targetCPU: ""
+  targetMemory: ""
+
+## @section Database parameters
+
+## External PostgreSQL configuration
+## All of these values are only used when postgresql.enabled is set to false
+## @param externalDatabase.host Database host
+## @param externalDatabase.port Database port number
+## @param externalDatabase.user Non-root username for Keycloak
+## @param externalDatabase.password Password for the non-root username for Keycloak
+## @param externalDatabase.database Keycloak database name
+## @param externalDatabase.existingSecret Name of an existing secret resource containing the database credentials
+## @param externalDatabase.existingSecretHostKey Name of an existing secret key containing the database host name
+## @param externalDatabase.existingSecretPortKey Name of an existing secret key containing the database port
+## @param externalDatabase.existingSecretUserKey Name of an existing secret key containing the database user
+## @param externalDatabase.existingSecretDatabaseKey Name of an existing secret key containing the database name
+## @param externalDatabase.existingSecretPasswordKey Name of an existing secret key containing the database credentials
+## @param externalDatabase.annotations Additional custom annotations for external database secret object
+##
+externalDatabase:
+  host: ""
+  port: 
+  user: 
+  database: 
+  password: ""
+  existingSecret: "keycloak"
+  existingSecretHostKey: "KEYCLOAK_DATABASE_HOST"
+  existingSecretPortKey: "KEYCLOAK_DATABASE_PORT"
+  existingSecretUserKey: "KEYCLOAK_DATABASE_USER"
+  existingSecretDatabaseKey: "KEYCLOAK_DATABASE_NAME"
+  existingSecretPasswordKey: "KEYCLOAK_DATABASE_PASSWORD"
+  annotations: {}
