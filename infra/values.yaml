@@ -262,7 +262,6 @@ enableDefaultInitContainers: true
 ##      echo "Do something."
 ##
 initdbScripts: {}
-# TEMP DISABLE INFINISPAN
 # initdbScripts:
 #   cp_default_conf.sh: |
 #      #!/bin/bash
@@ -450,7 +449,6 @@ customStartupProbe: {}
 ##
 lifecycleHooks: {}
 ## @param automountServiceAccountToken Mount Service Account token in pod
-## DONT KNOW YET, NEEDED?
 automountServiceAccountToken: false
 ## @param hostAliases Deployment pod host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
@@ -508,7 +506,6 @@ tolerations: []
 ##
 topologySpreadConstraints: []
 ## @param podManagementPolicy Pod management policy for the Keycloak statefulset
-## DONT KNOW YET, v26 says: Parallel
 podManagementPolicy: OrderedReady
 ## @param priorityClassName Keycloak pods' Priority Class Name
 ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
@@ -530,8 +527,7 @@ updateStrategy:
   type: RollingUpdate
   rollingUpdate: {}
 ## @param minReadySeconds How many seconds a pod needs to be ready before killing the next, during update
-## DONT KNOW YET
-minReadySeconds: 0
+minReadySeconds: 30
 ## @param extraVolumes Optionally specify extra list of additional volumes for Keycloak pods
 ##
 # DISABLED
@@ -688,7 +684,6 @@ ingress:
   ## @param ingress.hostnameStrict Disables dynamically resolving the hostname from request headers.
   ## Should always be set to true in production, unless your reverse proxy overwrites the Host header.
   ## If enabled, the hostname option needs to be specified.
-  ## DONT KNOW YET
   hostnameStrict: false
   ## @param ingress.path [string] Default path for the ingress record (evaluated as template)
   ##
@@ -878,13 +873,10 @@ metrics:
   service:
     ports:
       ## @param metrics.service.ports.http Metrics service HTTP port
-      ## DONT KNOW YET
       http: 8080
       ## @param metrics.service.ports.https Metrics service HTTPS port
-      ## DONT KNOW YET
       https: 8443
       ## @param metrics.service.ports.metrics Metrics service Metrics port
-      ## DONT KNOW YET
       metrics: 9000
     ## @param metrics.service.annotations [object] Annotations for enabling prometheus to access the metrics endpoints
     ##
