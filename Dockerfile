@@ -8,7 +8,7 @@ ENV KC_DB=postgres
 ENV KC_HTTP_RELATIVE_PATH=/
 
 ADD --chown=keycloak:keycloak ./providers providers/
-ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
+# ADD --chown=keycloak:keycloak ./denhaagtheme/ themes/denhaagtheme/
 
 RUN bin/kc.sh build
 

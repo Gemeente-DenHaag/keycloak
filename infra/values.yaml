@@ -536,6 +536,10 @@ minReadySeconds: 30
 #   emptyDir: {}
 # ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for Keycloak container(s)
 # ##
+extraVolumeMounts:
+- mountPath: /opt/bitnami/keycloak/themes
+  name: empty-dir
+  subPath: themes-dir
 # DISABLED
 # extraVolumeMounts:
 # - mountPath: /tmp

@@ -230,3 +230,29 @@ externalDatabase:
   existingSecretDatabaseKey: "KEYCLOAK_DATABASE_NAME"
   existingSecretPasswordKey: "KEYCLOAK_DATABASE_PASSWORD"
   annotations: {}
+
+initContainers:
+  - name: download-set-keycloak-theme
+    image: acrkeyclkpweu01.azurecr.io/busybox:1.37
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Download keycloak theme ${KEYCLOAK_THEME_VERSION} for zgw..."
+        curl -v https://github.com/Gemeente-DenHaag
+        mkdir /emptydir/themes-dir
+        cd /emptydir/themes-dir
+        wget https://github.com/Gemeente-DenHaag/keycloak-theme/releases/download/${KEYCLOAK_THEME_VERSION}/${KEYCLOAK_THEME_VERSION}.tar.gz && \
+        tar -xzvf ./"${KEYCLOAK_THEME_VERSION}.tar.gz" && \
+        rm ./"${KEYCLOAK_THEME_VERSION}.tar.gz"
+
+        ls /emptydir/themes-dir
+        sleep 60
+
+    volumeMounts:
+      - mountPath: /emptydir
+        name: empty-dir
+
+    env:
+      - name: KEYCLOAK_THEME_VERSION
+        value: "v0.0.1"
